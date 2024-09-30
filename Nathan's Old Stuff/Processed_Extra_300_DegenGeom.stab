@@ -1,0 +1,60 @@
+***************************************************************************************************************************************************************************************** 
+
+# Name                   Value      Units             
+Sref_                   %f Lunit^2             
+Cref_                   %f Lunit               
+Bref_                   %f Lunit               
+Xcg_                    %f Lunit               
+Ycg_                    %f Lunit               
+Zcg_                    %f Lunit               
+Mach_                   %f no_unit             
+AoA_                    %f deg                 
+Beta_                   %f deg                 
+Rho_                    %f Munit/Lunit^3       
+Vinf_                 %f Lunit/Tunit         
+Roll__Rate              %f rad/Tunit           
+Pitch_Rate              %f rad/Tunit           
+Yaw___Rate              %f rad/Tunit           
+
+#
+Case                   Delta    Units         CFx          CFy          CFz          CMx          CMy          CMz          CL           CD           CS           CMl          CMm          CMn
+#
+Base_Aero              +0.000 n/a          %f   %f    %f   %f    %f   %f    %f    %f   %f    %f    %f    %f 
+Alpha                  +1.000 deg          %f   %f    %f   %f   %f   %f    %f    %f   %f    %f   %f    %f 
+Beta                   +1.000 deg          %f   %f    %f    %f    %f   %f    %f    %f   %f   %f    %f    %f 
+Roll__Rate             +1.000 rad/Tunit    %f    %f    %f    %f    %f    %f    %f    %f    %f   %f    %f   %f 
+Pitch_Rate             +1.000 rad/Tunit    %f   %f    %f   %f   %f   %f    %f    %f   %f    %f   %f    %f 
+Yaw___Rate             +1.000 rad/Tunit    %f    %f    %f   %f   %f    %f    %f    %f    %f    %f   %f   %f 
+Mach                   +0.100 no_unit      %f   %f    %f   %f    %f   %f    %f    %f   %f    %f    %f    %f 
+Ailerons               +1.000 deg          %f    %f    %f    %f    %f    %f    %f    %f    %f   %f    %f   %f 
+Elevators              +1.000 deg          %f   %f    %f   %f   %f   %f    %f    %f   %f    %f   %f    %f 
+Rudder                 +1.000 deg          %f   %f    %f    %f    %f   %f    %f    %f   %f   %f    %f    %f 
+#
+#
+#             Base    Derivative:                                                                                                                      
+#             Aero         wrt          wrt          wrt          wrt          wrt          wrt          wrt          wrt          wrt          wrt    
+Coef          Total        Alpha        Beta          p            q            r           Mach         U        ConGrp_1     ConGrp_2     ConGrp_3   
+#              -           per          per          per          per          per          per          per          per          per          per    
+#              -           rad          rad          rad          rad          rad          M            u            rad          rad          rad    
+#
+CFx       %f   %f   %f   %f    %f   %f    %f    %f    %f    %f    %f 
+CFy      %f   %f   %f    %f    %f    %f   %f   %f    %f    %f   %f 
+CFz       %f    %f    %f    %f    %f    %f    %f    %f   %f    %f    %f 
+CMx      %f   %f    %f    %f   %f   %f    %f    %f    %f   %f    %f 
+CMy       %f   %f    %f   %f   %f   %f    %f    %f    %f   %f   %f 
+CMz      %f   %f   %f    %f    %f    %f   %f   %f    %f    %f   %f 
+CL        %f    %f    %f    %f    %f    %f    %f    %f   %f    %f    %f 
+CD        %f    %f    %f   %f    %f   %f    %f    %f    %f    %f    %f 
+CS       %f   %f   %f    %f    %f    %f   %f   %f    %f    %f   %f 
+CMl       %f    %f   %f   %f    %f    %f   %f   %f   %f    %f   %f 
+CMm       %f   %f    %f   %f   %f   %f    %f    %f    %f   %f   %f 
+CMn       %f    %f    %f   %f   %f   %f    %f    %f   %f   %f    %f 
+#
+#
+#
+# Result                 Value      Units             
+SM                      %f no_unit             
+X_np                    %f Lunit               
+#
+#
+#
