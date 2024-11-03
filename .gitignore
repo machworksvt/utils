@@ -1,15 +1,2 @@
-geometry/*.txt
-geometry/*.adb
-geometry/*.dat
-geometry/*.csv
-geometry/*.cuts
-geometry/*.fem
-geometry/*.fit
-geometry/*.slc
-geometry/*.txt
-geometry/*.bak
-geometry/*.srf
-geometry/*.svg
-geometry/*.txt
-geometry/*.wbpj
-MK2/*
+geometry/*
+!geometry/icarus_mk.vsp3
