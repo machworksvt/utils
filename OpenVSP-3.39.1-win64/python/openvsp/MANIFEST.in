@@ -1,0 +1,10 @@
+include openvsp/_vsp.so 
+include openvsp/_vsp_g.so
+
+include openvsp/vspaero*
+include openvsp/vsploads*
+include openvsp/vspviewer*
+
+recursive-include openvsp *.py
+
+include MANIFEST.in
