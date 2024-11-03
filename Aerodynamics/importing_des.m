@@ -1,0 +1,1 @@
+system('"C:\Users\stevi\Downloads\OpenVSP-3.40.1-win64-Python3.11 (2)\OpenVSP-3.40.1-win64\vsp.exe" -batch "C:\Users\stevi\Downloads\OpenVSP-3.40.1-win64-Python3.11 (2)\OpenVSP-3.40.1-win64\icarus_mk2 2.vsp3" -des "exported_design.des"');

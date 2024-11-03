@@ -1,0 +1,14 @@
+
+
+filename = 'param.des';
+
+data = readtable(filename,".des",);
+
+chord = 0.3;
+span = 0.2;
+
+Params{1,"VarName5"} = chord;
+Params{2,"VarName5"} = span;
+
+%“vsp.exe -des <desfile> <filename.vsp3>
+%system('C:\Users\stevi\Downloads\OpenVSP-3.40.1-win64-Python3.11 (2)\OpenVSP-3.40.1-win64\vsp.exe-des<>';
