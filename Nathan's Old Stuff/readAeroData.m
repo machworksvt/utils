@@ -1,13 +1,6 @@
-function data = readAeroData(filename)
-    % Open the file
-    fid = fopen(filename, 'r');
-    
-    if fid == -1
-        error('File could not be opened, check name or path.')
-    end
-
+function data = readAeroData()
     spec = fileread('Processed_Extra_300_DegenGeom.stab');
-    rawData = fscanf(fid, spec);
+    rawData = fscanf('Extra_300_DegenGeom.stab', spec);
     data = struct();
     data.Sref = rawData(1);
     data.Cref = rawData(2);
