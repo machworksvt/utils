@@ -19,5 +19,5 @@ icuras_fileLocation = "C:\Users\stevi\Downloads\OpenVSP-3.40.1-win64-Python3.11 
 %vsp.exe -des <desfile> <filename.vsp3>
 %system(vsp_fileLocation + ' -des' + design_fileName + ' -v  ' + icuras_fileLocation);
 
-%should look like
-system('"C:\Users\stevi\Downloads\OpenVSP-3.40.1-win64-Python3.11 (2)\OpenVSP-3.40.1-win64\vsp.exe" -des param.des -v "C:\Users\stevi\Downloads\OpenVSP-3.40.1-win64-Python3.11 (2)\OpenVSP-3.40.1-win64\icarus_mk2 2.vsp3"');
+%should look like (fix)***
+system('"C:\Users\stevi\AeroGit\OpenVSP-3.39.1-win64\vsp.exe" -des param.des -v "C:\Users\stevi\AeroGit\geometry\icarus_mk2.vsp3"');
