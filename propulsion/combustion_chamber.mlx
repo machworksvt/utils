@@ -1,0 +1,151 @@
+%This is for when the plane is at 800 ft
+clear; clc;
+
+%given initial states of air
+gamma=1.4; %gamma of air
+R=287; %R of air
+cp=1004; %specific heat capacity Jin /(kg*K)
+madot1=0.240; %initial mass flow rate of the jet in kg/s
+Ta=282.702; %ambient temperature at 2750 ft
+T1=851.2531 %initial temperature in K before it enters the diffuser
+PR=2.3; %this is the pressure ratio from the ambient pressure to the exit pressure of the jet
+pa=91652.5; %ambient pressure at 2750 ft
+rho1=1.13364; %ambient density at 2750 ft
+
+%given values for fuel
+Qr=43*10^6; %Qr value of kerosene
+
+%First we're going to do some quick calculations to figure out other
+%Givens from the JetCat P80 website
+a1=sqrt(gamma*R*T1); %speed of sound coming into the diffuser
+v1kmh=1305; %initial velocity of air coming into the diffuser in km/h
+v1=1305*(1/60)*(1/60)*(1000) %velocity coming into the diffuser in m/s
+p1=1.944*pa %initial pressure coming into the diffuser
+m1= v1/a1 %mach going into the diffuser
+diameter1=0.06625; %diameter of the exit of the engine
+radius1=diameter1/2
+diameterinner=0.04425; %inner diameter of the engine
+innerradius=diameterinner/2;
+newrad=radius1-innerradius
+A1=pi*(diameter1/2)^2-pi*(diameterinner/2)^2 %area of the jet engine
+enterradius=radius1-innerradius;
+diameternew=2*sqrt(A1/pi)
+radiusnew=diameternew/2
+lengthnew=diameternew*3.5
+
+%Second, we're going to do some calculations for the diffuser itself
+%Using isentropic relation equations
+T1overT0=(1+(gamma-1)/2*m1^2)^-1; %temperature ratio from first mach number
+p1overp0=(1+((gamma-1)/2)*m1^2)^-(gamma/(gamma-1)); %pressure ratio from first mach number
+A1overAstar=((gamma+1)/2)^((-gamma-1)/(2*gamma-2))*(1/m1)*((1+(gamma-1)/2*m1^2)/(1+(gamma-1)/2))^((gamma+1)/(2*gamma-2)); %area ratio from first mach number
+
+
+%pipe size calculations
+diameter2=0.06514 %diameter of combustion chamber THIS WE CAN CHANGE
+radius2=diameter2/2 %radius of combustion chamber
+A2=pi*(diameter2/2)^2%area of the jet engine
+lengthnewer=diameter2*3.5 %length of combustion chamber in m
+A2overAstar=A1overAstar.*A2./A1; %new area ratio of second mach number
+
+syms m2
+info1=solve(A2overAstar==((gamma+1)/2).^((-gamma-1)/(2*gamma-2)).*(1./m2).*((1+(gamma-1)/2.*m2.^2)/(1+(gamma-1)/2)).^((gamma+1)/(2*gamma-2))); %using isentropic area ratio, have area ratio to solve m2
+m2 = double(info1(1)) %2nd mach number exiting the diffuser/entering the combustion chamber
+T2overT0=(1+(gamma-1)/2*m2^2)^-1; %temperature ratio from second mach number
+p2overp0=(1+((gamma-1)/2)*m2^2)^-(gamma/(gamma-1)); %pressure ratio from second mach number
+T2=T2overT0*(1/T1overT0)*T1 %new temperature exiting the diffuser
+p2=p2overp0*(1/p1overp0)*p1 %new pressure exiting the diffuser
+rho2=p2/(R*T2); %new density exiting the diffuser
+a2=sqrt(gamma*R*T2); %new speed of sound exiting the diffuser
+v2=m2*a2 %new velocity exiting the diffuser
+madot2=rho2*v2*A2 %new mass flow rate exiting the diffuser
+
+%Third, we're going to find the q we need when we add fuel, heat addition
+%Using Rayleigh flow relation equations
+T2overTstar=(((gamma+1)^2).*(m2.^2))./((1+gamma.*(m2.^2)).^2); %critical temperature ratio from m2
+T02overT0star=((gamma+1).*m2.^2*(2+(gamma-1).*m2.^2))./((1+gamma.*m2.^2)^2); %stagnation over critical stagnation temperature ratio from m2
+p2overpstar=(gamma+1)./(1+gamma.*m2.^2); %critical pressure ratio from m2
+p02overp0star=((gamma+1)./(1+gamma.*m2.^2)).*(((2/(gamma+1)).*(1+((gamma-1)/2).*m2^2)).^(gamma/(gamma-1))); %stagnation over critical stagnation pressure ratio from m2
+T02=(1./T2overT0).*T2; %new stagnation temperature from m2
+p02=(1./p2overp0).*p2; %new stagnation pressure from p2
+T0star=(1./T02overT0star).*T02; %solving for critical stagnation temperature from m2
+q=7.5*10^5;%q value can change, influences out combustion
+
+
+%solving for information at the end of the combustion chamber
+T03=T02+q./cp; %new stagnation temperature at the end of the added fuel
+T03overT0star=(T03./T02).*T02overT0star; %new stagnation over critical stagnation temperature ratio
+
+syms m3
+info2=solve(T03overT0star==((2*(gamma+1).*m3.^2)./((1+gamma*m3.^2).^2)).*(1+((gamma-1)/2)*m3.^2),m3); %using the stagnation over critical stagnation temperature to solve for new mach
+m3 = double(info2(2)) %new mach number reaching sonic at the end of the fuel chamber
+T3overTstar=(((gamma+1).^2).*m3.^2)./((1+gamma.*m3.^2).^2); %new critical temperature ratio from m3
+p3overpstar=(gamma+1)./(1+gamma.*m3.^2); %new critical pressure ratio from m3
+T3=T3overTstar.*(1./T2overTstar).*T2 %temperature at the end of the combustion chamber
+p3=p2*0.98%p3overpstar.*(1./p2overpstar).*p2 %pressure at the end of the combustion chamber
+T3overT0=(1+(gamma-1)/2*m3^2)^-1;%temperature ratio from third mach number
+p3overp0=(1+((gamma-1)/2)*m3^2)^-(gamma/(gamma-1)); %pressure ratio from third mach number
+A3=A2 %constant area across the combustion chamber
+A3overAstar=((gamma+1)/2)^((-gamma-1)/(2*gamma-2))*(1/m3)*((1+(gamma-1)/2*m3^2)/(1+(gamma-1)/2))^((gamma+1)/(2*gamma-2)); %area ratio from third mach number
+a3=sqrt(R*T3*gamma); %speed of sound at end of combustion
+v3=m3*a3 %velocity at the end of combustion
+
+% Interpolation for intermediate Mach numbers (from 1 to m3)
+mach_numbers = linspace(0, m3, 100); % Array of Mach numbers between 1 and m3
+T = zeros(size(mach_numbers)); % Array to store temperatures
+P = zeros(size(mach_numbers)); % Array to store pressures
+V = zeros(size(mach_numbers)); % Array to store velocities
+
+for i = 1:length(mach_numbers)
+    M = mach_numbers(i); % Current Mach number
+    
+    % Rayleigh flow relations
+    m2 = 0.3;
+    T2overTstar(i)=(((gamma+1)^2).*(m2.^2))./((1+gamma.*(m2.^2)).^2); %critical temperature ratio from m2
+    T3overTstar(i)=(((gamma+1).^2).*M.^2)./((1+gamma.*M.^2).^2); %new critical temperature ratio from m3
+    T(i) = T2 * (1/T2overTstar(i)) * T3overTstar(i); % Temperature    
+    % Velocity: m * a = velocity at each point
+    a = sqrt(R * T(i) * gamma); % Speed of sound at current point
+    V(i) = M * a; % Velocity
+end
+% Plot results
+figure;
+subplot(3,1,1);
+plot(mach_numbers, T, 'LineWidth', 2);
+xlabel('Mach Number');
+ylabel('Temperature (K)');
+title('Temperature along the combustion chamber');
+
+subplot(3,1,3);
+plot(mach_numbers, V, 'LineWidth', 2);
+xlabel('Mach Number');
+ylabel('Velocity (m/s)');
+title('Velocity along the combustion chamber');
+
+rho3=p3/(R*T3);
+madot3=rho3*v3*A3;
+
+%Nozzle using isentropic relations
+%Using isentropic relation equations
+m4=m1*1.4 %want mach number 20% higher than the original
+T4overTstar=(((gamma+1).^2).*m4.^2)./((1+gamma.*m4.^2).^2); %new critical temperature ratio from m3
+p4overpstar=(gamma+1)./(1+gamma.*m4.^2); %new critical pressure ratio from m3
+A4overAstar=((gamma+1)/2)^((-gamma-1)/(2*gamma-2))*(1/m4)*((1+(gamma-1)/2*m4^2)/(1+(gamma-1)/2))^((gamma+1)/(2*gamma-2)); %area ratio from fourth mach number
+T4=T4overTstar.*(1./T3overTstar).*T3; %temperature at the end of the combustion chamber
+T4final=T4(end) %final temperature
+p4=p4overpstar*(1/p3overpstar)*p3 %new pressure exiting the diffuser
+A4=A4overAstar*(1/A3overAstar)*A3 %exit area of the nozzle
+diameter4=2*sqrt(A4/pi) %diameter of the nozzle
+rho4=p4/(R*T4final); %density at the end of the nozzle
+a4=sqrt(gamma*R*T4final); %speed of sound at the exit nozzle
+v4=a4*m4 %exit velocity of the nozzle
+madot4=rho4*v4*A4; %final mass flow rate of the nozzle
+
+%Control Volume Analysis, assumes fuel line comes in at 90 degrees
+f=(cp*(T3-T2))/(T2*cp+Qr-T3*cp); %f=incoming air mass flow rate/fuel mass flow rate 
+mfdot=f/madot2 %solving for fuel mass flow rate
+massfracfuel=q/Qr %mass fraction of the fuel
+length4 = 3.5*diameter2
+
+%Thrust equations
+ti=madot1*v1 + (p1 - pa)*A1
+tf=madot4*v4 + (p4 - pa)*A4
