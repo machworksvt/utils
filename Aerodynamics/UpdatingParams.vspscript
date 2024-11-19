@@ -1,0 +1,35 @@
+
+void main()
+{
+
+    string wid =  "XVVFXQRAJD"; // MainWing ID (found in source code)
+
+    string span_id = "FAKAJYYYEXH";      // Parm ID
+   	 
+SetParmVal( span_id, 3 );
+
+    Update();
+
+    string chord_id = "KFFTUWAMWNE";      // Parm ID
+   	 
+SetParmVal( chord_id, 0.2 );
+
+    Update();
+
+    string sweep_id = "IHHUCGZTHFP";      // Parm ID
+   	 
+SetParmVal( sweep_id, 6 );
+
+    Update();
+
+    // Save the current vehicle to the file "example.vsp3"
+    WriteVSPFile( GetVSPFileName(), SET_ALL );
+
+    //==== Check For API Errors ====//
+    while ( GetNumTotalErrors() > 0 )
+    {
+        ErrorObj err = PopLastError();
+        Print( err.GetErrorString() );
+    }
+
+}
