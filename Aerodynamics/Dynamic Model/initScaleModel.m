@@ -1,5 +1,5 @@
 
-
+maneuver = CRUISE
 
 
 coeffMatrix = [0.027 0.121 0 0 0 0 0 0 0 0;
