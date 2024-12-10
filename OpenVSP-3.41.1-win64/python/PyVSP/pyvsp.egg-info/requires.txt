@@ -1,0 +1,4 @@
+pypubsub
+vtk>=8.1.2
+wxpython>=4.0.4
+numpy>=1.9.1

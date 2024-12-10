@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: utilities
+Version: 0.1.0
+Author: Uber Technologies, Inc.
+Author-email: 
+License: MIT
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: scipy

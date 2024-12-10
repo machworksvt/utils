@@ -1,0 +1,12 @@
+Metadata-Version: 2.1
+Name: pyvsp
+Version: 0.1.0
+Summary: M4 demonstration application for Navy
+Home-page: http://www.m4-engineering.com
+Author: Thomas Nascenzi
+Author-email: tnascenzi@m4-engineering.com
+License: MIT
+Requires-Dist: pypubsub
+Requires-Dist: vtk>=8.1.2
+Requires-Dist: wxpython>=4.0.4
+Requires-Dist: numpy>=1.9.1

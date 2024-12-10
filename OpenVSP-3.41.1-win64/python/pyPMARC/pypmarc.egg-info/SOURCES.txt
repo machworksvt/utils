@@ -1,0 +1,8 @@
+setup.py
+pypmarc/__init__.py
+pypmarc/pyPMARC.py
+pypmarc.egg-info/PKG-INFO
+pypmarc.egg-info/SOURCES.txt
+pypmarc.egg-info/dependency_links.txt
+pypmarc.egg-info/requires.txt
+pypmarc.egg-info/top_level.txt

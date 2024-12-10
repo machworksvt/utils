@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Name: openvsp
+Version: 3.41.1
+Summary: OpenVSP Python Wrapper
+Author: Uber Technologies
+Author-email: 
+License: MIT
+Requires-Dist: degen_geom
+Requires-Dist: utilities
+Requires-Dist: openvsp_config

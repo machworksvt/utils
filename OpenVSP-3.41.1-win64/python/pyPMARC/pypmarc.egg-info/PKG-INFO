@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: pypmarc
+Version: 0.1
+Summary: Python tools for parsing PMARC12 files.
+Home-page: 
+Author: Rob McDonald
+Author-email: rob.a.mcdonald@gmail.com
+License: MIT
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: dataclasses
+Requires-Dist: pydantic
+Requires-Dist: f90nml
