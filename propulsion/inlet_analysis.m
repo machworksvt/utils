@@ -43,16 +43,18 @@ V_bypass_MAX = m_dot_bypass_MAX / (rho * A_bypass); %speed through bypass at vma
 T_TO = -2*V_av_TO*A_inlet*rho + m_dot_bypass_TO*V_bypass_TO % "Net thrust" from intake configuration
 
 nlp = struct;
-nlp.x = [A_inlet, d];
-nlp.f = A_inlet;
-nlp.g = [V_bypass_MAX, d, V_dot_bypass_TO, V_dot_total_TO];
+nlp.x = [A_inlet, d]; % variables for the algorithm to change
+nlp.f = A_inlet; % minimize this
+nlp.g = [V_bypass_MAX, d, V_dot_bypass_TO, V_dot_total_TO]; %variables with constraints on them
 
-lbg = [0, 0.01, 150*0.001, 450 * 0.001];
+lbg = [0, 0.01, 150*0.001, 450 * 0.001]; % upper and lower bounds for the constraint variables g
 ubg = [0.7*343, inf, inf, inf];
 
-F = nlpsol('F', 'ipopt', nlp);
-sol = F('x0', [0.05, 0.01], 'ubg', ubg, 'lbg', lbg);
+F = nlpsol('F', 'ipopt', nlp); % create the solver
+sol = F('x0', [0.05, 0.01], 'ubg', ubg, 'lbg', lbg); % solve
 
+
+% output results
 fprintf("Results:\n")
 fprintf("Single Inlet Area (m^2): %f\n", full(sol.x(1,1)));
 fprintf("Bypass Width (m): %f\n", full(sol.x(1,2)));
