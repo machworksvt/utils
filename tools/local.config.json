@@ -1,0 +1,8 @@
+{
+ "vsp3_file": "local.vsp3",
+ "settings": {
+  "vsp_path": "../OpenVSP-3.41.1-win64/vsp.exe",
+  "type": "IV"
+ },
+ "massConfigurations": []
+}
