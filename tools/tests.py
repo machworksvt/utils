@@ -5,53 +5,63 @@ from rich.table import Table
 console = Console()
 
 
-def testVSPAERO():
-    # Step 1: Load the VSP model
-    vsp.ClearVSPModel()
-    vsp.ReadVSPFile("local.vsp3")
 
-    # Step 2: Export geometry for analysis
-    compGeom = "VSPAEROComputeGeometry"
-    vsp.SetAnalysisInputDefaults(compGeom)
-    vsp.SetIntAnalysisInput(compGeom, "AnalysisMethod", [vsp.VORTEX_LATTICE])
-    vsp.SetIntAnalysisInput(compGeom, "GeomSet", [1])
+# Step 1: Load the VSP model
+vsp.ClearVSPModel()
+vsp.ReadVSPFile("local.vsp3")
 
-    print("Checking geometry for analysis...")
-    vsp.PrintAnalysisInputs(compGeom)
-    compGeom_results = vsp.ExecAnalysis(compGeom)
-    vsp.PrintResults(compGeom_results)
+# Step 2: Export geometry for analysis
+compGeom = "VSPAEROComputeGeometry"
+vsp.SetAnalysisInputDefaults(compGeom)
+vsp.SetIntAnalysisInput(compGeom, "AnalysisMethod", [vsp.VORTEX_LATTICE])
+vsp.SetIntAnalysisInput(compGeom, "GeomSet", [1])
 
-    geom_ids = vsp.FindGeoms()
-    for geom_id in geom_ids:
-        name = vsp.GetGeomName(geom_id)
-        in_set_0 = vsp.GetSetFlag(geom_id, 1)  # Check if in Set 0
-        print(f"Geom ID: {geom_id}, Name: {name}, In Set 0: {in_set_0}")
+print("Checking geometry for analysis...")
+vsp.PrintAnalysisInputs(compGeom)
+compGeom_results = vsp.ExecAnalysis(compGeom)
+outputFileName = vsp.GetStringResults(compGeom_results, "DegenGeomFileName")
+timeToComplete = vsp.GetDoubleResults(compGeom_results, "Analysis_Duration_Sec")[0]
+print(timeToComplete)
+console.print(f"Geometry computed for operating point 'none' in {timeToComplete:.2f} seconds. File saved as '{outputFileName}'")
+vsp.PrintResults(compGeom_results)
 
-    # Step 3: Set up VSPAERO analysis
-    myAnalysis = "VSPAEROSweep"
-    vsp.SetAnalysisInputDefaults(myAnalysis)
+geom_ids = vsp.FindGeoms()
+for geom_id in geom_ids:
+    name = vsp.GetGeomName(geom_id)
+    in_set_0 = vsp.GetSetFlag(geom_id, 1)  # Check if in Set 0
+    print(f"Geom ID: {geom_id}, Name: {name}, In Set 0: {in_set_0}")
 
-    # Reference geometry and freestream conditions
-    vsp.SetIntAnalysisInput(myAnalysis, "GeomSet", [1])  # Use Set 0
-    vsp.SetDoubleAnalysisInput(myAnalysis, "MachStart", [0.1])
-    vsp.SetDoubleAnalysisInput(myAnalysis, "AlphaStart", [0.0])
-    vsp.SetDoubleAnalysisInput(myAnalysis, "AlphaEnd", [1.0])
-    vsp.SetIntAnalysisInput(myAnalysis, "AlphaNpts", [2])  # Number of alpha points
-    vsp.SetDoubleAnalysisInput(myAnalysis, "ReCref", [1e6])  # Reynolds number
+# Step 3: Set up VSPAERO analysis
+myAnalysis = "VSPAEROSweep"
+vsp.SetAnalysisInputDefaults(myAnalysis)
 
-    # Analysis method
-    vsp.SetIntAnalysisInput(myAnalysis, "AnalysisMethod", [vsp.VORTEX_LATTICE])
+# Reference geometry and freestream conditions
+vsp.SetIntAnalysisInput(myAnalysis, "GeomSet", [1])  # Use Set 0
+vsp.SetDoubleAnalysisInput(myAnalysis, "MachStart", [0.1])
+vsp.SetDoubleAnalysisInput(myAnalysis, "AlphaStart", [0.0])
+vsp.SetIntAnalysisInput(myAnalysis, "AlphaNpts", [1])  # Number of alpha points
+vsp.SetDoubleAnalysisInput(myAnalysis, "ReCref", [1e6])  # Reynolds number
 
-    # Update and execute
-    vsp.Update()
-    vsp.PrintAnalysisInputs(myAnalysis)
-    allResults = vsp.ExecAnalysis(myAnalysis)
+vsp.SetIntAnalysisInput(myAnalysis, "NumWakeNodes", [16])
+vsp.SetIntAnalysisInput(myAnalysis, "WakeNumIter", [3])
+# Analysis method
+vsp.SetIntAnalysisInput(myAnalysis, "AnalysisMethod", [vsp.VORTEX_LATTICE])
+vsp.SetIntAnalysisInput(myAnalysis, "UnsteadyType", [vsp.STABILITY_DEFAULT])
+# Update and execute
+vsp.SetStringAnalysisInput(myAnalysis, "RedirectFile", ["log.txt"])
+vsp.SetIntAnalysisInput(myAnalysis, "NCPU", [16])
+vsp.Update()
+vsp.PrintAnalysisInputs(myAnalysis)
 
-    # Save results
-    vsp.WriteResultsCSVFile(allResults, "Results.csv")
+allResults = vsp.ExecAnalysis(myAnalysis)
 
-    # Step 4: Clean up
-    vsp.ClearVSPModel()
+timeToSolve = vsp.GetDoubleResults(allResults, "Analysis_Duration_Sec")[0]
+print(f"Analysis completed in {timeToSolve:.2f} seconds.")
+
+history_results = vsp.GetAllResultsNames()
+print(history_results)
+# Save results
+vsp.WriteResultsCSVFile(allResults, "Results.csv")
 
 
 def list_CS_groups(_):
@@ -97,5 +107,3 @@ def list_CS_groups(_):
 
     console.print(table)
 
-
-list_CS_groups(None)

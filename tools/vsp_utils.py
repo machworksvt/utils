@@ -42,14 +42,12 @@ def load(args):
 
 def save(args):
     """Save the VSP3 file and its configuration"""
-    if not 0 <= len(args) <= 1:
-        return False
     try:
         file_path = args[0] if len(args) == 1 else None
         config.save_files(file_path)
         return True
     except Exception as e:
-        console.print(f"\tFailed to save file: {e}[/red]")
+        console.print(f"\t[red]Failed to save file: {e}[/red]")
         return False
 
 def info(args):

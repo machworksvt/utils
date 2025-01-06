@@ -34,7 +34,7 @@ def listMassConfigurations(_):
     console.print(table)
     return True
 
-def createMassConfiguration(_): #TODO: Input verification
+def createMassConfiguration(_): 
     # Choose name
     while True:
         input_name = console.input(f"{MassConfiguration._prefix} Name: ").strip()
@@ -42,23 +42,47 @@ def createMassConfiguration(_): #TODO: Input verification
             break
         else:
             console.print(f"{MassConfiguration._prefix} Empty input. Try again.")
-    #input mass
+    
+    # Input mass
     while True:
-        input_mass = console.input(f"{MassConfiguration._prefix} Mass (kg): ")
-        if input_mass.isnumeric() and float(input_mass) > 0:
+        input_mass = console.input(f"{MassConfiguration._prefix} Mass (kg): ").strip()
+        try:
             mass = float(input_mass)
-            break
+            if mass > 0:
+                break
+            else:
+                console.print(f"{MassConfiguration._prefix} Mass must be positive. Try again.")
+        except ValueError:
+            console.print(f"{MassConfiguration._prefix} Invalid input. Please enter a numeric value.")
+    
+    # Input CG location
+    while True:
+        input_cg = console.input(f"{MassConfiguration._prefix} CG Location (x,y,z) separated by spaces (m): ").strip().split()
+        if len(input_cg) == 3:
+            try:
+                cg = np.array([float(i) for i in input_cg])
+                break
+            except ValueError:
+                console.print(f"{MassConfiguration._prefix} Invalid input. Please enter numeric values.")
         else:
-            console.print(f"{MassConfiguration._prefix} Non-numeric/empty/negative input. Try again.")
-    #input CG location
-    input_cg = console.input(f"{MassConfiguration._prefix} CG Location (x,y,z) separated by spaces (m): ").split() #TODO: Add error checking
-    cg = np.array([float(i) for i in input_cg])
-
-    #input inertia
-    input_Ixxyyzz = console.input(f"{MassConfiguration._prefix} Input moments of inertia (Ixx,Iyy,Izz) separated by spaces (kgm^2):").split()
-    input_Ixz = console.input(f"{MassConfiguration._prefix} Input product of inertia Ixz (kgm^2):").strip()
-    inertia_input = np.array([[float(input_Ixxyyzz[0]), 0, float(input_Ixz)],[0, float(input_Ixxyyzz[1]), 0],[float(input_Ixz), 0, float(input_Ixxyyzz[2])]]) #TODO: check this
-
+            console.print(f"{MassConfiguration._prefix} Please enter exactly three values separated by spaces.")
+    
+    # Input inertia
+    while True:
+        input_Ixxyyzz = console.input(f"{MassConfiguration._prefix} Input moments of inertia (Ixx,Iyy,Izz) separated by spaces (kgm^2): ").strip().split()
+        input_Ixz = console.input(f"{MassConfiguration._prefix} Input product of inertia Ixz (kgm^2): ").strip()
+        if len(input_Ixxyyzz) == 3:
+            try:
+                inertia_input = np.array([
+                    [float(input_Ixxyyzz[0]), 0, float(input_Ixz)],
+                    [0, float(input_Ixxyyzz[1]), 0],
+                    [float(input_Ixz), 0, float(input_Ixxyyzz[2])]
+                ])
+                break
+            except ValueError:
+                console.print(f"{MassConfiguration._prefix} Invalid input. Please enter numeric values.")
+        else:
+            console.print(f"{MassConfiguration._prefix} Please enter exactly three values for moments of inertia separated by spaces.")
     
     newConfig = MassConfiguration(input_name, cg, mass, inertia_input)
     config.addMassConfiguration(newConfig)
@@ -76,3 +100,4 @@ def deleteMassConfiguration(args):
 
 def generateMassConfiguration(args):
     """Generate a mass configuration from a VSP mass-props analysis"""
+    raise NotImplementedError
