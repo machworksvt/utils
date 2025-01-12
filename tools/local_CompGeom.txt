@@ -1,0 +1,47 @@
+...Comp Geom...
+10 Num Comps
+14 Total Num Meshes
+82576 Total Num Tris
+
+Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
+    0.551      0.368      0.007      0.000  MainWing       
+    0.551      0.366      0.007      0.000  MainWing       
+    0.693      0.654      0.024      0.000  Fusealge       
+    0.213      0.001      0.006      0.000  Fuel Tank      
+    0.213  48192565.310      0.006      0.006  Fuel Mass Full 
+    0.149  48192566.392      0.003      0.003  Fuel Mass Half 
+    0.056      0.047      0.000      0.000  VTail          
+    0.056      0.047      0.000      0.000  VTail          
+    0.068      0.061      0.000      0.000  Elevator       
+    0.068      0.061      0.000      0.000  Elevator       
+    0.070      0.021     -0.001     -0.001  Intake         
+    1.139      0.307      0.013      0.000  MainWing2      
+    0.092      0.000      0.002      0.000  H20PRO         
+-------------------------------------------------
+    3.919  96385133.636      0.067      0.154  Totals         
+
+Tag_Theo_Area   Tag_Wet_Area    Tag_Name
+        0.444          0.265    MainWing_S_Surf0
+        0.444          0.263    MainWing_S_Surf1
+        0.693          0.654    Fusealge_S_Surf0
+        0.213          0.001    Fuel Tank_S_Surf0
+        0.213      48192565.310    Fuel Mass Full_S_Surf0
+        0.149      48192566.392    Fuel Mass Half_S_Surf0
+        0.046          0.038    VTail_S_Surf0  
+        0.046          0.038    VTail_S_Surf1  
+        0.015          0.008    Elevator_S_Surf0
+        0.015          0.008    Elevator_S_Surf1
+        0.070          0.021    Intake_S_Surf0 
+        0.570          0.155    MainWing2_S_Surf0
+        0.570          0.153    MainWing2_S_Surf1
+        0.092          0.000    H20PRO_S_Surf0 
+        0.073          0.072    MainWing_S_Surf0,Flaps
+        0.033          0.032    MainWing_S_Surf0,Ailerons
+        0.073          0.071    MainWing_S_Surf1,Flaps
+        0.033          0.032    MainWing_S_Surf1,Ailerons
+        0.009          0.009    VTail_S_Surf0,Ruddervators
+        0.009          0.009    VTail_S_Surf1,Ruddervators
+        0.053          0.053    Elevator_S_Surf0,SS_CONT_0
+        0.053          0.053    Elevator_S_Surf1,SS_CONT_0
+WARNING: 1 open meshes merged
+     Merged: MainWing2

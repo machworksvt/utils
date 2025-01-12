@@ -1,0 +1,197 @@
+{
+ "vsp3_file": "local.vsp3",
+ "settings": {
+  "vsp_path": "../OpenVSP-3.41.1-win64/vsp.exe",
+  "type": "IV",
+  "num_procs": 16
+ },
+ "operating_points": [
+  {
+   "name": "cruise",
+   "settings": {
+    "max_iterations": 5,
+    "tolerance": 0.0001
+   },
+   "parameters": {
+    "velocity": {
+     "value": 100.0,
+     "calculated": false
+    },
+    "load_factor": {
+     "value": 1.0,
+     "calculated": true
+    },
+    "bank_angle": {
+     "value": 0.0,
+     "calculated": false
+    },
+    "altitude": {
+     "value": 836.0,
+     "calculated": false
+    },
+    "massconfig_index": {
+     "value": 0,
+     "calculated": false
+    },
+    "Rec": {
+     "value": 1708881.388859654,
+     "calculated": true
+    },
+    "Mach": {
+     "value": 0.29667386726038514,
+     "calculated": true
+    },
+    "rate_of_climb": {
+     "value": 0.0,
+     "calculated": false
+    },
+    "flight_path_angle": {
+     "value": 0.0,
+     "calculated": true
+    },
+    "rate_of_turn": {
+     "value": 0.0,
+     "calculated": false
+    },
+    "density": {
+     "value": 1.1296714332268378,
+     "calculated": true
+    },
+    "dynamic_viscosity": {
+     "value": 1.763044370461812e-05,
+     "calculated": true
+    },
+    "speed_of_sound": {
+     "value": 337.07047042411676,
+     "calculated": true
+    }
+   },
+   "inputs": {
+    "alpha": {
+     "value": null,
+     "driver": "CL"
+    },
+    "beta": {
+     "value": null,
+     "driver": "CY"
+    }
+   },
+   "outputs": {
+    "CL": {
+     "value": 0.0,
+     "driver": "fixed"
+    },
+    "CY": {
+     "value": 0.0,
+     "driver": "fixed"
+    },
+    "Cl": {
+     "value": 0.0,
+     "driver": "fixed"
+    },
+    "Cm": {
+     "value": 0.0,
+     "driver": "fixed"
+    },
+    "Cn": {
+     "value": 0.0,
+     "driver": "fixed"
+    }
+   },
+   "controls": {
+    "Ailerons": {
+     "value": null,
+     "driver": "Cl",
+     "details": {
+      "id": 0,
+      "num_surfaces": 2,
+      "surface_names": [
+       "MainWing_Surf0_Ailerons",
+       "MainWing_Surf1_Ailerons"
+      ]
+     }
+    },
+    "FF_Elevator": {
+     "value": null,
+     "driver": "Cm",
+     "details": {
+      "id": 1,
+      "num_surfaces": 2,
+      "surface_names": [
+       "Elevator_Surf0_SS_CONT_0",
+       "Elevator_Surf1_SS_CONT_0"
+      ]
+     }
+    },
+    "RV_Pitch": {
+     "value": 0.0,
+     "driver": "fixed",
+     "details": {
+      "id": 2,
+      "num_surfaces": 2,
+      "surface_names": [
+       "VTail_Surf0_Ruddervators",
+       "VTail_Surf1_Ruddervators"
+      ]
+     }
+    },
+    "RV_Yaw": {
+     "value": null,
+     "driver": "Cn",
+     "details": {
+      "id": 3,
+      "num_surfaces": 2,
+      "surface_names": [
+       "VTail_Surf0_Ruddervators",
+       "VTail_Surf1_Ruddervators"
+      ]
+     }
+    },
+    "Flaps": {
+     "value": 0.0,
+     "driver": "fixed",
+     "details": {
+      "id": 4,
+      "num_surfaces": 2,
+      "surface_names": [
+       "MainWing_Surf0_Flaps",
+       "MainWing_Surf1_Flaps"
+      ]
+     }
+    }
+   },
+   "hasResults": false,
+   "modifiedSinceLastExec": true,
+   "isConverged": false,
+   "results": null
+  }
+ ],
+ "massConfigurations": [
+  {
+   "name": "cruise",
+   "cg": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "mass": 15.0,
+   "inertia_matrix": [
+    [
+     12.0,
+     0.0,
+     0.1
+    ],
+    [
+     0.0,
+     12.0,
+     0.0
+    ],
+    [
+     0.1,
+     0.0,
+     12.0
+    ]
+   ]
+  }
+ ]
+}

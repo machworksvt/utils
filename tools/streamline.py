@@ -1,3 +1,5 @@
+import openvsp_config
+
 import openvsp as vsp
 import os
 
@@ -8,6 +10,23 @@ import config_manager
 from rich.console import Console
 from rich.table import Table
 
+"""
+    TODO:
+        Change to operating point menu, stability/dynamics menu, loading menu
+            Test capabilities for turning flight
+            Create/Add capability for climbing flight
+            Settings capabilities to operating points 
+                Add types -> enable special performance metrics
+                    Cruise -> Range/Endurance Calcs
+                    Hi-Lift -> Takeoff/Landing Speeds and Ranges
+            Enable dynamic stability analyses
+        Get results better importing and exporting of results
+
+
+        Gitignore results files
+
+"""
+
 config = config_manager.ConfigurationManager()
 console = Console()
 config_manager.console = console
@@ -16,7 +35,6 @@ aero.console = console
 geom.console = console
 
 current_menu = "main"
-
 
 def help(_):
     """Display a help table for the current menu."""
@@ -153,6 +171,11 @@ menustructure = {
                 "desc":"Execute operating point by index",
                 "action":aero.executeOperatingPoint,
                 "usage":"execute <index>"
+            },
+            "stab":{
+                "desc":"Evaluate the stability of an operating point with results",
+                "action": aero.analyzeStability,
+                "usage": "stab <index>"
             }
         }
     },

@@ -122,29 +122,9 @@ def init_settings():
 
 def show_vehicle(_):
     """Open a visualization of the vehicle using OpenVSP's GUI in read-only mode."""
-    try:
-        # Check if a model is loaded
-        if not config.isModelLoaded():
-            print("\tNo model currently loaded.")
-            return True
-
-        vsp_executable = "../OpenVSP-3.41.1-win64/vsp.exe"
-
-        # Create a temporary file for visualization
-        with tempfile.NamedTemporaryFile(suffix=".vsp3", delete=False) as temp_file:
-            temp_file_path = temp_file.name
-            vsp.WriteVSPFile(temp_file_path)
-
-        # Open the temporary file in OpenVSP GUI
-        print(f"\tLaunching OpenVSP visualization for read-only viewing...")
-        subprocess.run([vsp_executable, temp_file_path], check=False)
-
-        # Cleanup: Remove the temporary file after viewing
-        os.remove(temp_file_path)
-        print("\tVisualization session closed.")
-    except Exception as e:
-        print(f"\tError displaying vehicle: {e}")
-    return True
+    console.print(f"\t[blue]Is GUI Build:{vsp.IsGUIBuild()} [/blue]")
+    vsp.EnableStopGUIMenuItem()
+    vsp.StartGUI()
 
 def list_CS_groups(_):
     if not config.isModelLoaded():

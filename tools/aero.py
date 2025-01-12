@@ -120,3 +120,25 @@ def editOperatingPoint(args):
             continue
         op.print()
     return True
+
+def analyzeStability(args):
+    if len(args) != 1:
+        return False
+    elif not args[0].isnumeric():
+        return False
+    elif not (0 <= int(args[0]) < len(config.operating_points)):
+        console.print(f"{OperatingPoint._prefix} Invalid operating point index.")
+        return True
+    
+    op = config.getOperatingPoint(int(args[0]))
+    if op is None:
+        console.print(f"{OperatingPoint._prefix} Operating point not found.")
+        return True
+    
+    if not op.hasResults:
+        console.print(f"{OperatingPoint._prefix} Operating point has no results. Run it first.")
+        return True
+
+    op._printResults()
+    op.analyzeStability()
+    return True
