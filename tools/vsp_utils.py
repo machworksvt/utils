@@ -43,7 +43,7 @@ def load(args):
 def save(args):
     """Save the VSP3 file and its configuration"""
     try:
-        file_path = args[0] if len(args) == 1 else None
+        file_path = args[0] if args is not None and len(args) >= 1 else None
         config.save_files(file_path)
         return True
     except Exception as e:

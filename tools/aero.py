@@ -12,14 +12,9 @@ config = ConfigurationManager()
 def createOperatingPoint(args):
     """Create a new operating point"""
     # Choose name
-    while True:
-        input_name = console.input(f"{OperatingPoint._prefix} Name: ").strip()
-        if input_name != "":
-            break
-        else:
-            console.print(f"{OperatingPoint._prefix} Empty input. Try again.")
-    op = OperatingPoint(input_name)
-    config.addOperatingPoint(op)
+    result = OperatingPoint.new()
+    if not result is False:
+        config.addOperatingPoint(result)
     return True
 
 def listOperatingPoints(args):
@@ -89,7 +84,7 @@ def editOperatingPoint(args):
         input_text = console.input(f"\t> ").strip().split()
         if len(input_text) == 0:
             break
-        if input_text[0] in op.parameters.keys():
+        if input_text[0] in op.generic_parameters.keys() or input_text[0] in op.freestream_parameters.keys() or input_text[0] in op.type_parameters.keys() :
             param_name = input_text[0]
             param_value = input_text[1]
             if not op.updateParameter(param_name, param_value):

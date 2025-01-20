@@ -15,10 +15,6 @@ from ambiance import Atmosphere
 from scipy import constants
 import pandas as pd
 import threading
-import io
-import sys
-import psutil
-
 
 console = None
 
@@ -26,7 +22,7 @@ class ConfigurationManager:
     """Manages configuration of the program"""
 
     _instance = None
-    _prefix = "[bold cyan]\t<config>[/bold cyan]"
+    _prefix = "[bold green]\t<config>[/bold green]"
     CONFIG_SUFFIX = ".config.json"
 
     def __new__(cls, *args, **kwargs):
@@ -142,7 +138,11 @@ class ConfigurationManager:
         return self.isLoaded
         
     def addOperatingPoint(self, op):
-        self.operating_points.append(op)
+        if op is None:
+            console.print(f"{self._prefix} Could not add operating point.")
+        else:
+            self.operating_points.append(op)
+            console.print(f"{self._prefix} Operating point added. Have {len(self.operating_points)} total.")
     
     def getControls():
         vsp.GetNumControlSurfaceGroups
@@ -160,9 +160,7 @@ class ConfigurationManager:
         return self.massConfigurations[idx] if 0 <= idx < len(self.massConfigurations) else None
 
     def getControls(self):
-        console.print(f"{self._prefix} Getting control surface groups...")
         numgroups = vsp.GetNumControlSurfaceGroups()
-        console.print(f"\tNumber of control surface groups: {numgroups}")
         controls = {}
         for i in range(numgroups):
             group_id = i
@@ -337,11 +335,135 @@ class OperatingPoint:
         }
     }
 
-    def __init__(self, name, settings=None, parameters=None, inputs=None, outputs=None, controls=None, hasResults=False, modifiedSinceLastExec=False, isConverged=False, results=None):   
+    """
+        Rework update/change parameters functions to more flexibly use differnent types
+        Calculation system should now just always overwrite other things
+
+        
+        Leverage default functionality for unitless quanitites
+    
+    """
+    _freestream_parameters_defaults = {
+        "velocity":{
+            "value": None,
+            "calculated": False,
+            "units": "m/s",
+            "required":True,
+            "limits":(0, -1)
+        },
+        "density":{
+            "value": 1.225,
+            "calculated": False,
+            "units": "kg/m^3",
+            "required":True,
+            "limits":(0, -1)
+        },
+        "dynamic_viscosity": {
+            "value": None, #TODO: Put sea-level value in here
+            "calculated": False,
+            "units": "bruh", #put units in here
+            "required":True,
+            "limits":(0, -1)
+        },
+        "speed_of_sound":{
+            "value": 343,
+            "calculated": False,
+            "units": "m/s",
+            "required":True,
+            "limits": (0, -1)
+        },
+        "altitude":{
+            "value":0,
+            "calculated":False,
+            "units":"m MSL",
+            "required":False,
+            "limits": (-1, -1)
+        }
+    }
+    _generic_parameters_defaults = {
+        "load_factor": {
+            "value":None,
+            "calculated": False,
+            "units":"",
+            "required":True,
+            "limits": (0, -1)
+        },
+        "Re":{
+            "value":None,
+            "calculated":False,
+            "units":"",
+            "required":True,
+            "limits": (0, -1)
+        },
+        "Mach":{
+            "value":None,
+            "calculated":False,
+            "units":"",
+            "required":True,
+            "limits":(0, -1)
+        },
+        "massconfig_index":{
+            "value":None,
+            "calculated":False,
+            "units":"",
+            "required":True,
+            "limits":[-1, -1]
+        }
+    }
+    _OPERATING_POINT_TEMPLATES = {
+        "cruise":{
+            "description" : "Simple steady wing-level nonclimbing flight",
+            "required_parameters": {}
+        },
+        "climb":{
+            "description": "Wings-level climb/descend",
+            "required_parameters": {
+                "flight_path_angle": {"value": None, "calculated":False, "units":"deg", "required":True, "limits": (-1, -1)},
+                "rate_of_climb": {"value":None, "calculated":False, "units":"m/s", "required":True, "limits": (-1, -1)}
+            }
+        },
+        "turn":{
+            "description": "Level turning flight",
+            "required_parameters":{
+                "turn_radius":{"value":None, "calculated":False, "units":"m","required":True, "limits": (0, -1)},
+                "rate_of_turn":{"value":None, "calculated":False, "units":"deg/s","required":True, "limits": (0, -1)},
+                "bank_angle":{"value":None, "calculated":False, "units":"deg","required":True, "limits": (0, 90)}
+            }
+        },
+        "hilift":{ #TODO There's the hi-lift options in vspaero I could think about adding functionality to
+            "description": "High-lift configuration (CL treated as CLmax)",
+            "required_parameters": {
+                "ground_effect_distance":{"value":None,"calculated":False,"units":"m","required":True, "limits": (0,-1)},
+                "CLmax":{"value":None,"calculated":False,"units":"","required":True, "limits": (0, -1)}
+            }
+        }
+    }
+
+    def __init__(self, name, type):
+        self.name = name
+        self.settings = {
+            "max_iterations": 5,
+            "tolerance": 1e-4,
+            "type": type
+        }
+        self.freestream_parameters = None
+        self.generic_parameters = None
+        self.type_parameters = None
+        self.inputs = None
+        self.outputs = None
+
+        self.isConverged = False
+        self.hasResults = False
+        self.modifiedSinceLastExec = True
+        self.results = None
+
+    """
+    def __init__(self, name, type, settings=None, parameters=None, inputs=None, outputs=None, controls=None, hasResults=False, modifiedSinceLastExec=False, isConverged=False, results=None):   
         self.name = name
         self.settings = settings if not settings is None else {
             "max_iterations": 5,
-            "tolerance": 1e-4
+            "tolerance": 1e-4,
+            "type": type
         }
         #TODO: Move mach and reynolds to inputs and force auto-calculation
         #TODO: Divide parameters into climbing, cruising, turning, etc.
@@ -361,10 +483,10 @@ class OperatingPoint:
             "dynamic_viscosity": { "value": None, "calculated": False },
             "speed_of_sound": { "value": None, "calculated": False }
         }
-        """
+        
             Inputs (incl controls) can be FIXED or DRIVEN
             Outputs can be DRIVERS/FIXED or FREE
-        """
+    
         self.inputs = inputs if not inputs is None else {
             "alpha":{
                 "value": 0.0,
@@ -408,24 +530,16 @@ class OperatingPoint:
                 }
         else:
             self.controls = controls
-        self.geometryComputed = False
+        
         self.isConverged = isConverged
         self.hasResults = hasResults
         self.modifiedSinceLastExec = modifiedSinceLastExec
         self.results = results
-
-    def __str__(self):
-        """Display operating point in readable format"""
-        execString = "[executed]" if self.analysiscomplete else "[not executed]"
-        return (f"'{self.name}': {execString}\n"
-                f"\t\tAlpha (deg): {self.alpha}\n"
-                f"\t\tBeta (deg): {self.beta}\n"
-                f"\t\tMach: {self.Mach}\n"
-                f"\t\tRe: {self.Re}\n")
+    """
     
     def print(self):
         """Print the operating point in a formatted manner to rich console"""
-        titlestr = f"[bold] Operating Point: '{self.name}'"
+        titlestr = f"[bold] Operating Point: '{self.name}' of type '{self.settings['type']}'"
         titlestr+=" >> " + ("[green]**READY**[/green]" if self.isReady() else "[red]**NOT READY**[/red]")
         titlestr+=" >> " + ("[green]**UNMODIFIED**[/green]" if not self.modifiedSinceLastExec else "[red]**MODIFIED**[/red]")
         titlestr+=" >> " + ("[green]**CONVERGED**[/green]" if self.isConverged else "[red]**NOT CONVERGED**[/red]")
@@ -433,59 +547,89 @@ class OperatingPoint:
         titlestr+="[/bold]"
         console.print(titlestr)
 
+        #console.print(self.generic_parameters)
+        #console.print(self.freestream_parameters)
+        #console.print(self.type_parameters)
 
+        tableList = []
         #TODO: Create a separate thing for the mass configuration bc it doesn't really work like the rest of the parameters
         # Create Tables
-        table1 = Table(title="Parameters")
-        table1.add_column("Parameter", style="cyan")
-        table1.add_column("Value", style="magenta")
-        for key in self.parameters.keys():
-            value = self.getParameter(key)
-            if value is None:
-                valprint = "---"
-            elif key == "massconfig_index":
-                valprint = f"{value}"
-            elif 1e-3 < value < 1e4:
-                valprint = f"{value:.3f}"
-            else:
-                valprint = f"{value:.3e}"
-            if self._getCalculated(key):
-                valprint = f"[yellow]{valprint}[/yellow]"
-            table1.add_row(key, valprint)
+        genparmstable = Table(title="Generic Parameters",show_header=False,box=None)
+        genparmstable.add_column("Parameter", style="cyan")
+        genparmstable.add_column("Value", style="magenta")
+        for name, param in self.generic_parameters.items():
+            firstColumn = f"{name}{'*' if param['required'] else ''}"
+            if param['units'] != "":
+                firstColumn += f" ({param['units']})"
+            secondColumn = f"{param['value'] if not (param['value'] is None) else '---'}"
+            if param['calculated']:
+                secondColumn = "[green]" + secondColumn + "[/green]"
+            genparmstable.add_row(firstColumn, secondColumn)
 
-        table2 = Table(title="Inputs")
-        table2.add_column("Var", style="green")
-        table2.add_column("--", style="yellow")
-        table2.add_column("Driver", style="blue")
+        tableList.append(genparmstable)
+
+        fsparmstable = Table(title="Freestream Parameters",show_header=False,box=None)
+        fsparmstable.add_column("Parameter", style="cyan")
+        fsparmstable.add_column("Value", style="magenta")
+        for name, param in self.freestream_parameters.items():
+            firstColumn = f"{name}{'*' if param['required'] else ''}"
+            if param['units'] != "":
+                firstColumn += f" ({param['units']})"
+            secondColumn = f"{param['value'] if not (param['value'] is None) else '---'}"
+            if param['calculated']:
+                secondColumn = "[green]" + secondColumn + "[/green]"
+            fsparmstable.add_row(firstColumn, secondColumn)
+
+        tableList.append(fsparmstable)
+
+        if not len(self.type_parameters.keys()) == 0:
+            typeparmstable = Table(title=f"{self.settings['type']} Parameters",show_header=False,box=None)
+            typeparmstable.add_column("Parameter", style="cyan")
+            typeparmstable.add_column("Value", style="magenta")
+            for name, param in self.type_parameters.items():
+                firstColumn = f"{name}{'*' if param['required'] else ''}"
+                if param['units'] != "":
+                    firstColumn += f" ({param['units']})"
+                secondColumn = f"{param['value'] if not (param['value'] is None) else '---'}"
+                if param['calculated']:
+                    secondColumn = "[green]" + secondColumn + "[/green]"
+                typeparmstable.add_row(firstColumn, secondColumn)
+            tableList.append(typeparmstable)
+
+        inputstable = Table(title="Inputs",show_header=False,box=None)
+        inputstable.add_column("Var", style="green")
+        inputstable.add_column("--", style="yellow")
+        inputstable.add_column("Driver", style="blue")
         for key, value in self.inputs.items():
             firstColumn = f"{key}"
             secondColumn = "==" if value["driver"] == "fixed" else "=>"
-            thirdColumn = value["value"] if value["driver"] == "fixed" else value["driver"]
-            table2.add_row(firstColumn, secondColumn, f"{thirdColumn}") #TODO implement driver
-
+            thirdColumn = f"{value['value']:.3g}" if value["driver"] == "fixed" else value["driver"]
+            inputstable.add_row(firstColumn, secondColumn, f"{thirdColumn}") #TODO implement driver
         for key, value in self.controls.items():
             firstColumn = f"{key}"
             secondColumn = "==" if value["driver"] == "fixed" else "=>"
-            thirdColumn = value["value"] if value["driver"] == "fixed" else value["driver"]
-            table2.add_row(firstColumn, secondColumn, f"{thirdColumn}")
+            thirdColumn = f"{value['value']:.3g}" if value["driver"] == "fixed" else value["driver"]
+            inputstable.add_row(firstColumn, secondColumn, f"{thirdColumn}")
+        tableList.append(inputstable)
 
-        table3 = Table(title="Outputs")
-        table3.add_column("Var", style="green")
-        table3.add_column("--", style="yellow")
-        table3.add_column("Value", style="green")
+        outputstable = Table(title="Outputs", show_header=False,box=None)
+        outputstable.add_column("Var", style="green")
+        outputstable.add_column("--", style="yellow")
+        outputstable.add_column("Value", style="green")
         for key, value in self.outputs.items():
             #either fixed or free
             firstColumn = f"{key}"
             secondColumn = "=="
-            thirdColumn = value["value"] if value["driver"] == "fixed" else value["driver"]
+            thirdColumn = f"{value['value']:.3g}" if value["driver"] == "fixed" else value["driver"]
             if value["driver"] == "fixed" and not self.isDriven(key):
                 thirdColumn = f"[red]{thirdColumn}[/red]"
-            table3.add_row(firstColumn, secondColumn, f"{thirdColumn}")
+            outputstable.add_row(firstColumn, secondColumn, f"{thirdColumn}")
+        tableList.append(outputstable)
 
 
-        if not self.parameters["massconfig_index"]["value"] is None:
-            massConfig = config.getMassConfiguration(self.getParameter("massconfig_index"))
-            table4 = Table(title="Mass Configuration")
+        if not self.getParameter("massconfig_index")["value"] is None:
+            massConfig = config.getMassConfiguration(self.getParameter("massconfig_index")["value"])
+            table4 = Table(title="Mass Configuration",box=None)
             table4.add_column("Parameter", style="cyan")
             table4.add_column("Value", style="magenta")
             table4.add_row("Name", massConfig.name)
@@ -494,27 +638,13 @@ class OperatingPoint:
             table4.add_row("Inertia Matrix", f"{massConfig.inertia_matrix[0, 0]:.3f}, {massConfig.inertia_matrix[0, 1]:.3f}, {massConfig.inertia_matrix[0, 2]:.3f}")
             table4.add_row("", f"{massConfig.inertia_matrix[1, 0]:.3f}, {massConfig.inertia_matrix[1, 1]:.3f}, {massConfig.inertia_matrix[1, 2]:.3f}")
             table4.add_row("", f"{massConfig.inertia_matrix[2, 0]:.3f}, {massConfig.inertia_matrix[2, 1]:.3f}, {massConfig.inertia_matrix[2, 2]:.3f}")
-            # Indent Tables
-            indented_table1 = Padding(table1, (0, 0, 0, 8))
-            indented_table2 = Padding(table2, (0, 0, 0, 4))
-            indented_table3 = Padding(table3, (0, 0, 0, 4))
-            indented_table4 = Padding(table4, (0, 0, 0, 4))
+            tableList.append(table4)
 
-            # Print Tables Side by Side
-            console.print(Columns([indented_table1, indented_table2, indented_table3, indented_table4]))
-        else:
-            # Indent Tables
-            indented_table1 = Padding(table1, (0, 0, 0, 8))
-            indented_table2 = Padding(table2, (0, 0, 0, 4))
-            indented_table3 = Padding(table3, (0, 0, 0, 4))
-
-            # Print Tables Side by Side
-            console.print(Columns([indented_table1, indented_table2, indented_table3]))
+        console.print(Columns(tableList, padding=(0, 1)))
     
     def isReady(self):
         """Check if the operating point is ready to be executed"""
-        all(self.isDriven(output) for output in self.outputs.keys())
-        return all([self.getParameter(key) is not None for key in self.parameters.keys()])
+        return not any(parm['required'] and parm['value'] is None for key, parm in {**self.generic_parameters,**self.freestream_parameters,**self.type_parameters}.items())
     
     def isDriven(self, output):
         """Check if an output is driven by an input"""
@@ -719,12 +849,12 @@ class OperatingPoint:
         
         # Set static parameters
         vsp.SetIntAnalysisInput(analysisString, "GeomSet", [1])  # Use Set 0
-        vsp.SetDoubleAnalysisInput(analysisString, "MachStart", [self.getParameter("Mach")])
-        vsp.SetDoubleAnalysisInput(analysisString, "ReCref", [self.getParameter("Rec")]) 
-        vsp.SetDoubleAnalysisInput(analysisString, "Vinf", [self.getParameter("velocity")])
-        vsp.SetDoubleAnalysisInput(analysisString, "Vref", [self.getParameter("velocity")])
-        vsp.SetDoubleAnalysisInput(analysisString, "Rho", [self.getParameter("density")])
-        mconfig = config.getMassConfiguration(self.getParameter("massconfig_index"))
+        vsp.SetDoubleAnalysisInput(analysisString, "MachStart", [self.getParameter("Mach")['value']])
+        vsp.SetDoubleAnalysisInput(analysisString, "ReCref", [self.getParameter("Re")['value']]) 
+        vsp.SetDoubleAnalysisInput(analysisString, "Vinf", [self.getParameter("velocity")['value']])
+        vsp.SetDoubleAnalysisInput(analysisString, "Vref", [self.getParameter("velocity")['value']])
+        vsp.SetDoubleAnalysisInput(analysisString, "Rho", [self.getParameter("density")['value']])
+        mconfig = config.getMassConfiguration(self.getParameter("massconfig_index")['value'])
         vsp.SetDoubleAnalysisInput(analysisString, "Xcg", [mconfig.cg[0]])
         vsp.SetDoubleAnalysisInput(analysisString, "Ycg", [mconfig.cg[1]])
         vsp.SetDoubleAnalysisInput(analysisString, "Zcg", [mconfig.cg[2]])
@@ -737,16 +867,22 @@ class OperatingPoint:
         vsp.SetIntAnalysisInput(analysisString, "UnsteadyType", [vsp.STABILITY_DEFAULT])
         vsp.SetIntAnalysisInput(analysisString, "2DFEMFlag", [0])
 
-
         # Set inputs that change from iteration to iteration
         vsp.SetDoubleAnalysisInput(analysisString, "AlphaStart", [self._getNextInput("alpha")])
+        vsp.SetIntAnalysisInput(analysisString, "AlphaNpts", [1])
+        vsp.SetDoubleAnalysisInput(analysisString, "AlphaEnd", [self._getNextInput("alpha")])
+
         vsp.SetDoubleAnalysisInput(analysisString, "BetaStart", [self._getNextInput("beta")])
+        vsp.SetIntAnalysisInput(analysisString, "BetaNpts", [1])
+        vsp.SetDoubleAnalysisInput(analysisString, "BetaEnd", [self._getNextInput("beta")])
         control_group_settings_container = vsp.FindContainer("VSPAEROSettings",0)
         for key in self.controls.keys():
             #need to get ID of control group
             group_id = self.controls[key]["details"]["id"]
             deflection_angle_id = vsp.FindParm(control_group_settings_container, "DeflectionAngle", f"ControlSurfaceGroup_{group_id}")
             vsp.SetParmVal(deflection_angle_id, self._getNextInput(key))
+
+        #vsp.PrintAnalysisInputs(analysisString)
 
         #TODO: There are so many more inputs I can set. need to investigate further
         #TODO: Can add multiple levels of fidelity depending on how far from convergence we are (currently does not need to be so high)
@@ -760,6 +896,9 @@ class OperatingPoint:
  
     def _processTrimResults(self):
         """Process the stability results"""
+        resultsNames = vsp.GetAllResultsNames()
+        for name in resultsNames:
+            console.print(f"{self._prefix} {name}")
         stab_results = vsp.FindLatestResultsID("VSPAERO_Stab")
         #Pull the base case results
         #console.print(f"{self._prefix} SM: {SM}, X_NP: {X_NP}")
@@ -876,7 +1015,9 @@ class OperatingPoint:
         return {
             "name": self.name,
             "settings": self.settings,
-            "parameters": self.parameters,
+            "genparms": self.generic_parameters,
+            "fsparms": self.freestream_parameters,
+            "tparms": self.type_parameters,
             "inputs": self.inputs,
             "outputs": self.outputs,
             "controls": self.controls,
@@ -909,20 +1050,32 @@ class OperatingPoint:
         return {key: convert(val) for key, val in self.results.items()}
     
     def getParameter(self, parameter):
-        if parameter in self.parameters:
-            return self.parameters[parameter]["value"]
+        if parameter in self.generic_parameters:
+            return self.generic_parameters[parameter]
+        elif parameter in self.freestream_parameters:
+            return self.freestream_parameters[parameter]
+        elif parameter in self.type_parameters:
+            return self.type_parameters[parameter]
         else:
-            console.print(f"{self._prefix} Invalid parameter name.")
+            return False
 
     def _setParameter(self, parameter, value):
-        if parameter in self.parameters:
-            self.parameters[parameter]["value"] = value
+        if parameter in self.generic_parameters:
+            self.generic_parameters[parameter]["value"] = value
+        elif parameter in self.freestream_parameters:
+            self.freestream_parameters[parameter]["value"] = value
+        elif parameter in self.type_parameters:
+            self.type_parameters[parameter]["value"] = value
         else:
             console.print(f"{self._prefix} Invalid parameter name.")
 
     def _setCalculated(self, parameter, value):
-        if parameter in self.parameters:
-            self.parameters[parameter]["calculated"] = value
+        if parameter in self.generic_parameters:
+            self.generic_parameters[parameter]["calculated"] = value
+        elif parameter in self.freestream_parameters:
+            self.freestream_parameters[parameter]["calculated"] = value
+        elif parameter in self.type_parameters:
+            self.type_parameters[parameter]["calculated"] = value
         else:
             console.print(f"{self._prefix} Invalid parameter name.")
 
@@ -937,26 +1090,34 @@ class OperatingPoint:
             TODO:
                 - Add turning calculations
         """
+
+        if not self.getParameter(parameter):
+            return False
         
-        if parameter == "velocity":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Velocity must be a number.")
+        try:
+            vf = float(value)
+        except ValueError:
+            return False
+
+        # Check limits on input parameters
+        limits = self.getParameter(parameter)['limits']
+        if not ((limits[0] == -1 or vf >= limits[0]) and (limits[1] == -1 or vf <= limits[1])):
+            return False
+
+        # Mass config special case can probably isolate this
+        if parameter == "massconfig_index":
+            if not (0 <= int(value) < len(config.massConfigurations)):
+                console.print(f"{self._prefix} Invalid mass configuration index.")
                 return False
-            if float(value) < 0:
-                console.print(f"{self._prefix} Velocity must be positive.")
-                return False
-            self._setParameter("velocity", float(value))
-            self._setCalculated("velocity", False)
-        elif parameter == "altitude":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Altitude must be a number.")
-                return False
-            if float(value) < 0:
-                console.print(f"{self._prefix} Altitude must be positive.")
-                return False
-            self._setParameter("altitude", float(value))
-            self._setCalculated("altitude", False)
-            console.print(f"{self._prefix} Altitude set to {value} m.")
+            vf = int(value)
+            
+        # Safe to run internal method set parameter
+        self._setParameter(parameter, vf)
+        self._setCalculated(parameter, False)
+
+        # Now treat special cases
+        #TODO: Check values
+        if parameter == "altitude":
             confirm = console.input(f"{self._prefix} Set density, viscosity and speed of sound to ISA standard at {value} m? (y/n): ").strip().lower()
             if confirm == "y":
                 atmosphere = Atmosphere(float(value))
@@ -967,125 +1128,88 @@ class OperatingPoint:
                 self._setParameter("speed_of_sound", atmosphere.speed_of_sound[0])
                 self._setCalculated("speed_of_sound", True)
                 console.print(f"{self._prefix} Density, viscosity and speed of sound set to ISA standard at {value} m.")
-        elif parameter == "load_factor": #TODO: check against maximum load factor
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Load factor must be a number.")
-                return False
-            if float(value) < 0:
-                console.print(f"{self._prefix} Load factor must be positive.")
-                return False
-            self._setParameter("load_factor", float(value))
-            self._setCalculated("load_factor", False)
-        elif parameter == "bank_angle":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Bank angle must be a number.")
-                return False
-            if float(value) < 0:
-                console.print(f"{self._prefix} Bank angle must be positive.")
-                return False
-            if float(value) > 89:
-                console.print(f"{self._prefix} Bank angle seems unrealistic. Please check the value. Use degrees.")
-                return False
-            self._setParameter("bank_angle", float(value))
-            self._setCalculated("bank_angle", False)
-        elif parameter == "massconfig_index":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Mass configuration index must be a number.")
-                return False
-            if not (0 <= int(value) < len(config.massConfigurations)):
-                console.print(f"{self._prefix} Invalid mass configuration index.")
-                return False
-            self._setParameter("massconfig_index", int(value))
-            self._setCalculated("massconfig_index", False)
-        elif parameter == "Rec":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Reynolds number must be a number.")
-                return False
-            if float(value) < 0:
-                console.print(f"{self._prefix} Reynolds number must be positive.")
-                return False
-            self._setParameter("Rec", float(value))
-            self._setCalculated("Rec", False)
         elif parameter == "Mach":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Mach number must be a number.")
-                return False
-            if float(value) < 0:
-                console.print(f"{self._prefix} Mach number must be positive.")
-                return False
             if 0.7 < float(value) < 1.25: #TODO: Add/integrate 2D transonic analysis capability from xfoil
                 console.print(f"{self._prefix} [yellow]Warning: Transonic analysis (Mach 0.7 - 1.25) is not supported and may not work correctly.[/yellow]")
-            self._setParameter("Mach", float(value))
-            self._setCalculated("Mach", False)
-        elif parameter == "rate_of_climb":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Rate of climb must be a number.")
-                return False
-            self._setParameter("rate_of_climb", float(value))
-            self._setCalculated("rate_of_climb", False)
-        elif parameter == "flight_path_angle":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Flight path angle must be a number.")
-                return False
-            if float(value) < -90 or float(value) > 90:
-                console.print(f"{self._prefix} Flight path angle must be between -90 and 90 degrees.")
-                return False
-            self._setParameter("flight_path_angle", float(value))
-            self._setCalculated("flight_path_angle", False)
         elif parameter == "rate_of_turn":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Rate of turn must be a number.")
-                return False
-            self._setParameter("rate_of_turn", float(value))
-            self._setCalculated("rate_of_turn", False)
-        elif parameter == "density":
-            if not value.isnumeric():
-                console.print(f"{self._prefix} Density must be a number.")
-                return False
-            if float(value) <= 0:
-                console.print(f"{self._prefix} Density must be positive.")
-                return False
-            self._setParameter("density", float(value))
-            self._setCalculated("density", False)
-        else:
-            console.print(f"{self._prefix} Invalid parameter name.")
-            return False
+            if not self.getParameter("velocity")['value'] is None:
+                rate_of_turn = self.getParameter("rate_of_turn")['value']
+                velocity = self.getParameter("velocity")['value']
+                bank_angle_deg = np.rad2deg(np.atan(rate_of_turn*velocity/constants.g))
+                self._setParameter("bank_angle", bank_angle_deg)
+                self._setCalculated("bank_angle", True)
+                turn_radius = (velocity**2)/(constants.g * np.tan(bank_angle_deg))
+                self._setParameter("turn_radius", turn_radius)
+                self._setCalculated("turn_radius", True)
+        elif parameter == "turn_radius":
+            if not self.getParameter("velocity")['value'] is None:
+                turn_radius = self.getParameter("turn_radius")['value']
+                velocity = self.getParameter("velocity")['value']
+                bank_angle_deg = np.rad2deg(np.atan(turn_radius*constants.g/(velocity**2)))
+                self._setParameter("bank_angle", bank_angle_deg)
+                self._setCalculated("bank_angle", True)
+                rate_of_turn = constants.g/velocity * np.rad2deg(np.tan(np.deg2rad(bank_angle_deg)))
+                self._setParameter("turn_radius", turn_radius)
+                self._setCalculated("turn_radius", True)
+        elif parameter == "bank_angle":
+            if not self.getParameter("velocity")['value'] is None:
+                bank_angle_deg = self.getParameter("bank_angle")['value']
+                velocity = self.getParameter("velocity")['value']
+                turn_radius = (velocity**2)/(constants.g * np.tan(np.deg2rad(bank_angle_deg)))
+                self._setParameter("turn_radius", turn_radius)
+                self._setCalculated("turn_radius", True)
+                rate_of_turn = constants.g/velocity * np.rad2deg(np.tan(np.deg2rad(bank_angle_deg)))
+                self._setParameter("rate_of_turn", rate_of_turn)
+                self._setCalculated("rate_of_turn", True)
+        elif parameter == "flight_path_angle":
+            if not self.getParameter("velocity")['value'] is None:
+                console.print("got here")
+                velocity = self.getParameter("velocity")['value']
+                fpa = self.getParameter("flight_path_angle")['value']
+                load_factor = np.cos(np.deg2rad(fpa))
+                self._setParameter("load_factor", load_factor)
+                self._setCalculated("load_factor", True)
+                roc = velocity*np.sin(np.deg2rad(fpa))
+                self._setParameter("rate_of_climb", roc)
+                self._setCalculated("rate_of_climb", True)
+        elif parameter == "rate_of_climb":
+            if not self.getParameter("velocity")['value'] is None:
+                velocity = self.getParameter("velocity")['value']
+                roc = self.getParameter("rate_of_climb")['value']
+                fpa = np.asin(roc/velocity)
+                self._setParameter("flight_path_angle", np.rad2deg(fpa))
+                self._setCalculated("flight_path_angle", True)
+                load_factor = np.cos(fpa)
+                self._setParameter("load_factor", load_factor)
+                self._setCalculated("load_factor", True)
+
+
+
+
         
         #TODO: Improve this system here
-        if self.getParameter("velocity") is not None and self.getParameter("altitude") is not None:
-            atmosphere = Atmosphere(self.getParameter("altitude"))
-            density = atmosphere.density[0]
-            dynamic_viscosity = atmosphere.dynamic_viscosity[0]
-            speed_of_sound = atmosphere.speed_of_sound[0]
-            self._setParameter("density", density)
-            self._setCalculated("density", True)
-            self._setParameter("dynamic_viscosity", dynamic_viscosity)
-            self._setCalculated("dynamic_viscosity", True)
-            self._setParameter("speed_of_sound", speed_of_sound)
-            self._setCalculated("speed_of_sound", True)
-            console.print(f"{self._prefix} Updated density, viscosity, and speed of sound based on altitude {self.getParameter('altitude')} m.")
-        if self.getParameter("velocity") is not None and self.getParameter("density") is not None and self.getParameter("dynamic_viscosity") is not None:
+        if all(not (self.getParameter(param)['value'] is None) for param in ["velocity","density","dynamic_viscosity"]): #Auto-calculate Reynold's number
             refs = config.getReferenceQuantities()
             refChord = refs["refChord"]
-            Recalc = self.getParameter("velocity") * refChord * self.getParameter("density") / self.getParameter("dynamic_viscosity")
+            Recalc = self.getParameter("velocity")['value'] * refChord * self.getParameter("density")['value'] / self.getParameter("dynamic_viscosity")['value']
             console.print(f"{self._prefix} Reynolds number computed using reference chord {refChord} m")
             console.print(f"{self._prefix} Reynolds number set to '{Recalc}'. Override with 'Rec <value>'")
-            self._setParameter("Rec", Recalc)
-            self._setCalculated("Rec", True)
-        if self.getParameter("velocity") is not None and self.getParameter("speed_of_sound") is not None:
-            Mach = self.getParameter("velocity") / self.getParameter("speed_of_sound")
-            console.print(f"{self._prefix} Mach number computed using speed of sound {self.getParameter('speed_of_sound')} m/s")
+            self._setParameter("Re", Recalc)
+            self._setCalculated("Re", True)
+        if all(not (self.getParameter(param)['value'] is None) for param in ["velocity","speed_of_sound"]): #Auto-calculate Mach number
+            Mach = self.getParameter("velocity")['value'] / self.getParameter("speed_of_sound")['value']
+            console.print(f"{self._prefix} Mach number computed using speed of sound {self.getParameter('speed_of_sound')['value']} m/s")
             console.print(f"{self._prefix} Mach number set to '{Mach}'. Override with 'Mach <value>'")
             self._setParameter("Mach", Mach)
             self._setCalculated("Mach", True)
-        if self.getParameter("bank_angle") is not None:
-            bank_angle_rad = np.radians(self.getParameter("bank_angle"))
+        if self.settings['type'] == "turn" and self.getParameter("bank_angle")['value'] is not None:
+            bank_angle_rad = np.deg2rad(self.getParameter("bank_angle")['value'])
             load_factor = 1 / np.cos(bank_angle_rad)
             self._setParameter("load_factor", load_factor)
             self._setCalculated("load_factor", True)
-            console.print(f"{self._prefix} Load factor computed using bank angle {self.getParameter('bank_angle')} degrees")
-            console.print(f"{self._prefix} Load factor set to '{load_factor}'. Override with 'load_factor <value>'")
+        """
         if self.getParameter("rate_of_climb") is not None and self.getParameter("velocity") is not None:
+            pass
             velocity = self.getParameter("velocity")
             rate_of_climb = self.getParameter("rate_of_climb")
             flight_path_angle_rad = np.arcsin(rate_of_climb / velocity)
@@ -1094,6 +1218,8 @@ class OperatingPoint:
             self._setCalculated("flight_path_angle", True)
             console.print(f"{self._prefix} Flight path angle computed using rate of climb {rate_of_climb} m/s and velocity {velocity} m/s")
             console.print(f"{self._prefix} Flight path angle set to '{flight_path_angle_deg}'. Override with 'flight_path_angle <value>'")
+        """
+        
 
         self.modifiedSinceLastExec = True
         return True
@@ -1178,11 +1304,11 @@ class OperatingPoint:
         # Check if an output can be auto-calculated (just CL really)
         # TODO: Are there other things that can be auto-calculated?
         if output == "CL":
-            if self.getParameter("velocity") is not None and self.getParameter("density") is not None and self.getParameter("massconfig_index") is not None and self.getParameter("load_factor") is not None:
+            if all(not (self.getParameter(param)['value'] is None) for param in ["velocity","density","massconfig_index", "load_factor"]): #Auto-calculate CL
                 refs = config.getReferenceQuantities()
                 refArea = refs["refArea"]
-                totalmass = config.getMassConfiguration(self.getParameter("massconfig_index")).mass
-                CL = 2 * totalmass * self.getParameter("load_factor") * constants.g / (self.getParameter("velocity") ** 2 * refArea * self.getParameter("density"))
+                totalmass = config.getMassConfiguration(self.getParameter("massconfig_index")['value']).mass
+                CL = 2 * totalmass * self.getParameter("load_factor")['value'] * constants.g / (self.getParameter("velocity")['value'] ** 2 * refArea * self.getParameter("density")['value'])
                 self.outputs["CL"]["value"] = CL
                 console.print(f"{self._prefix} Calculated CL: {CL:.3f}")
                 return True
@@ -1288,26 +1414,24 @@ class OperatingPoint:
         console.print(f"{self._prefix} Omega: {omega_phugoid_approx:.3f}")
         console.print(f"{self._prefix} Zeta: {zeta_phugoid_approx:.3f}")
 
-        
-        
-
     def displayStabilityResults(self):
         pass      
 
     @classmethod
     def from_dict(cls, data):
-        return cls(
-            name=data["name"],
-            settings=data["settings"],
-            parameters=data["parameters"],
-            inputs=data["inputs"],
-            outputs=data["outputs"],
-            controls=data["controls"],
-            hasResults = data["hasResults"],
-            modifiedSinceLastExec = data["modifiedSinceLastExec"],
-            isConverged = data["isConverged"],
-            results = OperatingPoint.results_from_dict(data["results"])
-        )
+        op = cls(data["name"], data["settings"]["type"])
+        op.settings = data["settings"]
+        op.generic_parameters = data["genparms"]
+        op.freestream_parameters = data["fsparms"]
+        op.type_parameters = data["tparms"]
+        op.inputs = data['inputs']
+        op.outputs = data['outputs']
+        op.controls = data['controls']
+        op.isConverged = data['isConverged']
+        op.hasResults = data['hasResults']
+        op.modifiedSinceLastExec = data['modifiedSinceLastExec']
+        op.results = OperatingPoint.results_from_dict(data['results'])
+        return op
     
     @classmethod
     def results_from_dict(cls, results_dict):
@@ -1331,3 +1455,93 @@ class OperatingPoint:
                 return value  # Scalars remain unchanged
 
         return {key: convert(val) for key, val in results_dict.items()}
+    
+    @classmethod
+    def new(cls):
+        """Walk user through creating a new operating point"""
+        types = cls._OPERATING_POINT_TEMPLATES.keys()
+        #Choose operating point name
+        input_name = console.input(f"{cls._prefix} Enter operating point name: ")
+        if input_name == "":
+            console.print(f"{cls._prefix} Cancelled.")
+            return False
+
+        # Choose operating point type
+        console.print(f"{cls._prefix} Choose operating point type:")
+        table = Table(box=None, show_header=False)
+        table.add_column("Name", style="blue")
+        table.add_column("Desc", style="green")
+        for key, val in cls._OPERATING_POINT_TEMPLATES.items():
+            table.add_row(f"{key}", f"{val['description']}")
+        indented_table = Padding(table, pad=[0,0,0,12])
+        console.print(indented_table)
+        while True:
+            input_type = console.input(f"{cls._prefix} Enter type name: ")
+            if input_type == "":
+                console.print(f"{cls._prefix} Cancelled.")
+                return False
+            if input_type in cls._OPERATING_POINT_TEMPLATES.keys():
+                type = input_type
+                break
+
+        console.print(f"{cls._prefix} Creating operating point with name '{input_name}' and type '{input_type}' ...", end="")
+        op = OperatingPoint(name=input_name, type=input_type)
+        console.print(f" Done.")
+        console.print(f"{cls._prefix} Initializing parameter dictionaries ...", end="")
+        op.initialize_parameter_dictionaries()
+        console.print(" Done. ")
+        console.print(f"{cls._prefix} Initializing IOC dictionaries ...", end="")
+        op.initialize_IOC()
+        console.print(f" Done. Found {len(op.controls.keys())} control groups.")
+        return op
+
+    def initialize_parameter_dictionaries(self):
+        type = self.settings["type"]
+        self.freestream_parameters = self._freestream_parameters_defaults.copy()
+        self.generic_parameters = self._generic_parameters_defaults.copy()
+        self.type_parameters = self._OPERATING_POINT_TEMPLATES[type]["required_parameters"].copy()
+
+    def initialize_IOC(self): #better to initialize by type and auto-apply constraints
+        self.inputs = {
+            "alpha":{
+                "value": 0.0,
+                "driver":"fixed"
+            },
+            "beta":{
+                "value": 0.0,
+                "driver":"fixed"
+            }
+        }
+        self.outputs = {
+            "CL": {
+            "value": None,
+            "driver": "free"
+            },
+            "CY": {
+            "value": None,
+            "driver": "free"
+            },
+            "Cl": {
+            "value": None,
+            "driver": "free"
+            },
+            "Cm": {
+            "value": None,
+            "driver": "free"
+            },
+            "Cn": {
+            "value": None,
+            "driver": "free"
+            }
+        }
+        self.controls = {}
+        controls_data = config.getControls()
+        for group_name in controls_data.keys():
+            self.controls[group_name] = {
+                "value": 0.0,
+                "driver": "fixed",
+                "details": controls_data[group_name]
+            }
+
+        if self.settings['type'] == "cruise":
+            self.updateParameter("load_factor", 1)

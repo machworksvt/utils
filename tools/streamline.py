@@ -24,6 +24,7 @@ from rich.table import Table
 
 
         Gitignore results files
+        Aerodynamic surface label in info command not up to date
 
 """
 
@@ -220,7 +221,7 @@ def main():
     # Print the logo with the requested colors
     console.print(streamline_art.replace(">", "[cyan]>" + "[/cyan]").replace("█", "[green]█" + "[/green]"))
 
-    console.print("[bold green]Welcome to Streamline. Type 'help' for commands, 'exit' to quit.[/bold green]")
+    console.print(f"[bold green]Welcome to Streamline. Type 'help' for commands, 'exit' to quit. Using '{vsp.GetVSPVersion()}'[/bold green]")
     while True:
         try:
             menu = menustructure[current_menu] #pull current menu dictionary

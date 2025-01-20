@@ -1,5 +1,5 @@
-"c:\users\natha\onedrive - virginia tech\matlab\utils\openvsp-3.41.1-win64\python\openvsp\openvsp\vspaero.exe" -omp 16 -stab -write2dfem local_DegenGeom
-VSPAERO v.6.4.8 --- Compiled on: Nov 11 2024 at 03:17:10 PST 
+"c:\users\natha\onedrive - virginia tech\matlab\utils\openvsp-3.42.0-win64\python\openvsp\openvsp\vspaero.exe" -omp 16 -pstab -write2dfem "C:/Users/natha/OneDrive - Virginia Tech/MATLAB/utils/tools/local_DegenGeom"
+VSPAERO v.6.4.8 --- Compiled on: Jan 20 2025 at 01:23:45 PST 
 
 
 
@@ -73,7 +73,7 @@ Control surface(1) direction: 1.000000
 
 Control surface(2) direction 1.000000 
 
-Control group deflection angle: -0.000405 
+Control group deflection angle: 0.000064 
 
 ControlSurfaceGroup_[2].Name(): FF_Elevator 
 
@@ -87,7 +87,7 @@ Control surface(1) direction: 1.000000
 
 Control surface(2) direction -1.000000 
 
-Control group deflection angle: 0.439455 
+Control group deflection angle: -0.142400 
 
 ControlSurfaceGroup_[3].Name(): RV_Pitch 
 
@@ -115,7 +115,7 @@ Control surface(1) direction: 1.000000
 
 Control surface(2) direction 1.000000 
 
-Control group deflection angle: -0.000138 
+Control group deflection angle: 0.000216 
 
 ControlSurfaceGroup_[5].Name(): Flaps 
 
@@ -135,97 +135,87 @@ NumberOfQuadTrees: 1
 
 QuadTree(1):          2:    0.00000 
 
-Number Of Surfaces: 7 
+Number Of Surfaces: 6 
 
 GeomIDFlags are defined! 
 
-NumberOfDegenWings_: 6 
+NumberOfDegenWings_: 2 
 
-NumberOfDegenBodies_: 1 
+NumberOfDegenBodies_: 4 
 
 Found: 0 Rotors 
 
-NumberOfDegenBodies_: 4 
+NumberOfDegenBodies_: 16 
 
 Working on reading wing: 1 --> Name: MainWing with GeomID: WGMILYVNHM ... MainSurfNdx: 0 ... SymCopyNdx: 0 
 
 Working on reading wing: 2 --> Name: MainWing with GeomID: WGMILYVNHM ... MainSurfNdx: 0 ... SymCopyNdx: 1 
 
-Working on reading wing: 3 --> Name: VTail with GeomID: XWMMABNRLT ... MainSurfNdx: 0 ... SymCopyNdx: 0 
-
-Working on reading wing: 4 --> Name: VTail with GeomID: XWMMABNRLT ... MainSurfNdx: 0 ... SymCopyNdx: 1 
-
-Working on reading wing: 5 --> Name: Elevator with GeomID: CJXXKABRPI ... MainSurfNdx: 0 ... SymCopyNdx: 0 
-
-Working on reading wing: 6 --> Name: Elevator with GeomID: CJXXKABRPI ... MainSurfNdx: 0 ... SymCopyNdx: 1 
-
-NumberOfComponents_: 4 
+NumberOfComponents_: 5 
 
 Done loading in geometry! 
 
-NumberOfSurfaces_: 10 
+NumberOfSurfaces_: 18 
 
-NumberOfSurfaces_: 10 
+NumberOfSurfaces_: 18 
 
-NumberOfKuttaNodes: 90 
+NumberOfKuttaNodes: 66 
 
-NumberOfComponents_: 4
+NumberOfComponents_: 5
 
-Total NumberOfNodes:      4438 
+Total NumberOfNodes:      12226 
 
-Total NumberOfLoops:      8080 
+Total NumberOfLoops:      22800 
 
-Total NumberOfEdges:      12508 
+Total NumberOfEdges:      35008 
 
-Total NumberOfKuttaNodes: 90 
+Total NumberOfKuttaNodes: 66 
 
-NumberOfSurfacePatches_:  10 
+NumberOfSurfacePatches_:  18 
 
-Total surface area: 1.094583 
+Total surface area: 1.168936 
 
-Minimum loop area constraint set to: 1.094583 
+Minimum loop area constraint set to: 1.168936 
 
 Agglomerating mesh... 
 
-Grid:0 --> # loops:       8080 ...# Edges:      12508 ...# Nodes:       4438  
+Grid:0 --> # loops:      22800 ...# Edges:      35008 ...# Nodes:      12226  
 
-Grid:1 --> # loops:       4054 ...# Edges:       8482 ...# Nodes:       4438  
+Grid:1 --> # loops:      11530 ...# Edges:      23738 ...# Nodes:      12226  
 
-Merged 1 small loops out of 1 
+Merged 33 small loops out of 33 
 
-Grid:2 --> # loops:       1037 ...# Edges:       4476 ...# Nodes:       3449 
+Grid:2 --> # loops:       2933 ...# Edges:      12360 ...# Nodes:       9445 
 
-Merged 0 small loops out of 2 
+Merged 12 small loops out of 14 
 
-Grid:3 --> # loops:        279 ...# Edges:       2519 ...# Nodes:       2250 
+Grid:3 --> # loops:        759 ...# Edges:       6757 ...# Nodes:       6016 
 
-Merged 0 small loops out of 4 
+Merged 0 small loops out of 6 
 
 NumberOfGridLevels_: 3 
 
-NumberOfSurfacePatches_: 10 
+NumberOfSurfacePatches_: 18 
 
 Xmax_ - Xmin_: 1.600000 
 
 Ymax_ - Ymin_: 2.082800 
 
-Zmax_ - Zmin_: 0.257941 
+Zmax_ - Zmin_: 0.151000 
 
 
 
 Wake FarDist set to: 2.082800 
 
-Minimum loop area: 4.544541e-07 
+Minimum loop area: 3.627816e-09 
 
 Setting surface edge cutoff to: 1.000000e-07 
 
-Number Of Trailing Vortices: 90 
-
-VSPGeom().NumberOfComponents(): 4 
+Number Of Trailing Vortices: 66 
 
 NumberOfComponentGroups_: 1 
 
-Found 6 lifting surfaces for component group: 1 
+Found 2 lifting surfaces for component group: 1 
 
 Model type is VLM_MODEL... and not VSPGEOM_SURFACE 
 
@@ -235,13 +225,41 @@ Model type is VLM_MODEL... and not VSPGEOM_SURFACE
 
 Model type is VLM_MODEL... and not VSPGEOM_SURFACE 
 
-AllComponentsAreFixed_: 1 
+Model type is VLM_MODEL... and not VSPGEOM_SURFACE 
+
+AllComponentsAreFixed_: 0 
+
+OptimizationSolve_:  0  
+
+AdjointSolve_:       0  
+
+TimeStep_: 2.603500e-03 
+
+NumberOfTimeSteps_: 64 
+
+NumberOfTimeSteps_ * TimeStep_: 1.666240e-01 
+
+Period: 0.055536 
+
+ComponentGroupList_[c].StartAveragingTime(): 1.136917e-01 
+
+NumberOfTimeSamples: 20 
+
+Used FarFieldDist_ of: 2.082800 to calculate time step 
+
+TimeAnalysisType_: 3 
+
+TimeStep_: 0.002604 
+
+ReducedFrequency_: 0.785398 
+
+Unsteady_AngleRate_: 75.417515 
 
 Model type: VLM 
 
-NumberOfTotalWakeResidualNodes_: 4860 
+NumberOfTotalWakeResidualNodes_: 3564 
 
-NumberOfEquations_: 4054 
+NumberOfEquations_: 11530 
 
 No high lift data file found... 
 
@@ -249,21 +267,21 @@ Creating matrix preconditioners data structure...
 
 Starting at level: 3 
 
-Level: 3 has MaxLoops of: 20 
+Level: 3 has MaxLoops of: 28 
 
 Starting at level: 3 
 
-Created: 8 Matrix preconditioners 
+Created: 23 Matrix preconditioners 
 
-Min matrix: 470 Loops 
+Min matrix: 377 Loops 
 
-Max matrix: 512 Loops 
+Max matrix: 515 Loops 
 
-Avg matrix: 506 Loops 
+Avg matrix: 501 Loops 
 
 
 
-NumberOfVortexLoops_: 4054 
+NumberOfVortexLoops_: 11530 
 
 NumberOfEngineFaces_: 0 
 
@@ -271,9 +289,77 @@ VSPGeom().NumberOfSurfaces(): 0
 
 Done with setup... 
 
-Calculating Stability Derivatives... 
+Could not find control surface: Elevator_Surf0_SS_CONT_0 in control surface group: FF_Elevator 
 
-Calculating stability derivative case: 1 of 7 
+Known control surfaces:
+
+	MainWing_Surf0_Flaps
+
+	MainWing_Surf0_Ailerons
+
+	MainWing_Surf1_Flaps
+
+	MainWing_Surf1_Ailerons
+
+Could not find control surface: Elevator_Surf1_SS_CONT_0 in control surface group: FF_Elevator 
+
+Known control surfaces:
+
+	MainWing_Surf0_Flaps
+
+	MainWing_Surf0_Ailerons
+
+	MainWing_Surf1_Flaps
+
+	MainWing_Surf1_Ailerons
+
+Could not find control surface: VTail_Surf0_Ruddervators in control surface group: RV_Pitch 
+
+Known control surfaces:
+
+	MainWing_Surf0_Flaps
+
+	MainWing_Surf0_Ailerons
+
+	MainWing_Surf1_Flaps
+
+	MainWing_Surf1_Ailerons
+
+Could not find control surface: VTail_Surf1_Ruddervators in control surface group: RV_Pitch 
+
+Known control surfaces:
+
+	MainWing_Surf0_Flaps
+
+	MainWing_Surf0_Ailerons
+
+	MainWing_Surf1_Flaps
+
+	MainWing_Surf1_Ailerons
+
+Could not find control surface: VTail_Surf0_Ruddervators in control surface group: RV_Yaw 
+
+Known control surfaces:
+
+	MainWing_Surf0_Flaps
+
+	MainWing_Surf0_Ailerons
+
+	MainWing_Surf1_Flaps
+
+	MainWing_Surf1_Ailerons
+
+Could not find control surface: VTail_Surf1_Ruddervators in control surface group: RV_Yaw 
+
+Known control surfaces:
+
+	MainWing_Surf0_Flaps
+
+	MainWing_Surf0_Ailerons
+
+	MainWing_Surf1_Flaps
+
+	MainWing_Surf1_Ailerons
 
 Creating interaction lists... 
 
@@ -281,11 +367,18 @@ Creating interaction lists...
 
 Forward sweep... 
 
-1000 / 4054 
-2000 / 4054 
-3000 / 4054 
-4000 / 4054 
-The Forward Speed Up Ratio: 1.910753 
+1000 / 11530 
+2000 / 11530 
+3000 / 11530 
+4000 / 11530 
+5000 / 11530 
+6000 / 11530 
+7000 / 11530 
+8000 / 11530 
+9000 / 11530 
+10000 / 11530 
+11000 / 11530 
+The Forward Speed Up Ratio: 2.120793 
 
 Backward sweep... 
 
@@ -293,7 +386,7 @@ Working on level 2 of 3
 Working on level 3 of 3 
 
 
-Total Speed Up Ratio: 8.982250 
+Total Speed Up Ratio: 13.077652 
 
 
 
@@ -305,7 +398,7 @@ Xmax_ - Xmin_: 1.600000
 
 Ymax_ - Ymin_: 2.082800 
 
-Zmax_ - Zmin_: 0.257941 
+Zmax_ - Zmin_: 0.151000 
 
 
 
@@ -313,23 +406,15 @@ Wake FarDist set to: 2.082800
 
 
 
-SigmaAvg_: 0.035003 
+SigmaAvg_: 0.032556 
 
-There are:          6 Vortex Sheets 
+There are:          2 Vortex Sheets 
 
 Creating vortex sheet data... 
 
 There are:         33 kutta nodes for vortex sheet:          1  
 
 There are:         33 kutta nodes for vortex sheet:          2  
-
-There are:          6 kutta nodes for vortex sheet:          3  
-
-There are:          6 kutta nodes for vortex sheet:          4  
-
-There are:          6 kutta nodes for vortex sheet:          5  
-
-There are:          6 kutta nodes for vortex sheet:          6  
 
 Found a TE node that is common between vortex sheets: 1 and 2 
 
@@ -339,9 +424,286 @@ Solving... Mach: 0.100000 ... Alpha: 0.000000 ... Beta: 0.000000
 
 
 
-  Iter      Mach       AoA      Beta      CLtot      CDo       CDi      CDtot     CDt      CDtot_t    CStot      L/D        E       CFxtot    CFytot    CFztot    CMxtot    CMytot    CMztot    T/QS 
+TStep: 1     / 64    ... Time:    0.00260 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     1 / 64    ... Time:    0.00260 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.58400 ... TotTime:    3.85100 ... KTRes: 0.00000    
 
-Wake Iter:     1 / 3     ... GMRES Iter:     0 ... Red:    0.00000 / -1.00000   ...  Max:    0.99605 / 1.00000    ... KTRes: 0.00000    
-Wake Iter:     1 / 3     ... GMRES Iter:     1 ... Red:   -0.63658 / -1.00000   ...  Max:    0.35947 / 1.00000    ... KTRes: 0.00000    
-Wake Iter:     1 / 3     ... GMRES Iter:     2 ... Red:   -0.87999 / -1.00000   ...  Max:    0.11606 / 1.00000    ... KTRes: 0.00000    
+
+TStep: 2     / 64    ... Time:    0.00521 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     2 / 64    ... Time:    0.00521 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.60700 ... TotTime:    6.03500 ... KTRes: 0.00000    
+
+
+TStep: 3     / 64    ... Time:    0.00781 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     3 / 64    ... Time:    0.00781 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.63200 ... TotTime:    8.14300 ... KTRes: 0.00000    
+
+
+TStep: 4     / 64    ... Time:    0.01041 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     4 / 64    ... Time:    0.01041 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.65600 ... TotTime:   10.28200 ... KTRes: 0.00000    
+
+
+TStep: 5     / 64    ... Time:    0.01302 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     5 / 64    ... Time:    0.01302 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.63200 ... TotTime:   12.45600 ... KTRes: 0.00000    
+
+
+TStep: 6     / 64    ... Time:    0.01562 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     6 / 64    ... Time:    0.01562 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.66100 ... TotTime:   14.64400 ... KTRes: 0.00000    
+
+
+TStep: 7     / 64    ... Time:    0.01822 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     7 / 64    ... Time:    0.01822 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.65500 ... TotTime:   17.01400 ... KTRes: 0.00000    
+
+
+TStep: 8     / 64    ... Time:    0.02083 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     8 / 64    ... Time:    0.02083 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.68600 ... TotTime:   19.28800 ... KTRes: 0.00000    
+
+
+TStep: 9     / 64    ... Time:    0.02343 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:     9 / 64    ... Time:    0.02343 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.65600 ... TotTime:   21.58400 ... KTRes: 0.00000    
+
+
+TStep: 10    / 64    ... Time:    0.02604 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    10 / 64    ... Time:    0.02604 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.69100 ... TotTime:   23.84300 ... KTRes: 0.00000    
+
+
+TStep: 11    / 64    ... Time:    0.02864 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    11 / 64    ... Time:    0.02864 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.69600 ... TotTime:   26.18000 ... KTRes: 0.00000    
+
+
+TStep: 12    / 64    ... Time:    0.03124 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    12 / 64    ... Time:    0.03124 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.66100 ... TotTime:   28.46500 ... KTRes: 0.00000    
+
+
+TStep: 13    / 64    ... Time:    0.03385 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    13 / 64    ... Time:    0.03385 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:   -0.30500 ... TotTime:   29.74000 ... KTRes: 0.00000    
+
+
+TStep: 14    / 64    ... Time:    0.03645 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    14 / 64    ... Time:    0.03645 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.70500 ... TotTime:   33.14500 ... KTRes: 0.00000    
+
+
+TStep: 15    / 64    ... Time:    0.03905 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    15 / 64    ... Time:    0.03905 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.82500 ... TotTime:   35.61700 ... KTRes: 0.00000    
+
+
+TStep: 16    / 64    ... Time:    0.04166 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    16 / 64    ... Time:    0.04166 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.81500 ... TotTime:   38.17100 ... KTRes: 0.00000    
+
+
+TStep: 17    / 64    ... Time:    0.04426 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    17 / 64    ... Time:    0.04426 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.80400 ... TotTime:   40.71900 ... KTRes: 0.00000    
+
+
+TStep: 18    / 64    ... Time:    0.04686 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    18 / 64    ... Time:    0.04686 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.80700 ... TotTime:   43.19300 ... KTRes: 0.00000    
+
+
+TStep: 19    / 64    ... Time:    0.04947 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    19 / 64    ... Time:    0.04947 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87600 ... TotTime:   45.67100 ... KTRes: 0.00000    
+
+
+TStep: 20    / 64    ... Time:    0.05207 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    20 / 64    ... Time:    0.05207 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.85000 ... TotTime:   48.14600 ... KTRes: 0.00000    
+
+
+TStep: 21    / 64    ... Time:    0.05467 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    21 / 64    ... Time:    0.05467 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.80800 ... TotTime:   50.61500 ... KTRes: 0.00000    
+
+
+TStep: 22    / 64    ... Time:    0.05728 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    22 / 64    ... Time:    0.05728 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.91200 ... TotTime:   53.32100 ... KTRes: 0.00000    
+
+
+TStep: 23    / 64    ... Time:    0.05988 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    23 / 64    ... Time:    0.05988 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.88300 ... TotTime:   56.05200 ... KTRes: 0.00000    
+
+
+TStep: 24    / 64    ... Time:    0.06248 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    24 / 64    ... Time:    0.06248 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.90800 ... TotTime:   58.89300 ... KTRes: 0.00000    
+
+
+TStep: 25    / 64    ... Time:    0.06509 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    25 / 64    ... Time:    0.06509 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.86900 ... TotTime:   61.59900 ... KTRes: 0.00000    
+
+
+TStep: 26    / 64    ... Time:    0.06769 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    26 / 64    ... Time:    0.06769 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.91100 ... TotTime:   64.42800 ... KTRes: 0.00000    
+
+
+TStep: 27    / 64    ... Time:    0.07029 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    27 / 64    ... Time:    0.07029 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.89000 ... TotTime:   67.19600 ... KTRes: 0.00000    
+
+
+TStep: 28    / 64    ... Time:    0.07290 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    28 / 64    ... Time:    0.07290 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.90700 ... TotTime:   69.97200 ... KTRes: 0.00000    
+
+
+TStep: 29    / 64    ... Time:    0.07550 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    29 / 64    ... Time:    0.07550 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.85000 ... TotTime:   72.63600 ... KTRes: 0.00000    
+
+
+TStep: 30    / 64    ... Time:    0.07811 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    30 / 64    ... Time:    0.07811 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.88700 ... TotTime:   75.50900 ... KTRes: 0.00000    
+
+
+TStep: 31    / 64    ... Time:    0.08071 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    31 / 64    ... Time:    0.08071 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.90800 ... TotTime:   78.39500 ... KTRes: 0.00000    
+
+
+TStep: 32    / 64    ... Time:    0.08331 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    32 / 64    ... Time:    0.08331 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.95100 ... TotTime:   81.38900 ... KTRes: 0.00000    
+
+
+TStep: 33    / 64    ... Time:    0.08592 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    33 / 64    ... Time:    0.08592 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.89500 ... TotTime:   84.25200 ... KTRes: 0.00000    
+
+
+TStep: 34    / 64    ... Time:    0.08852 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    34 / 64    ... Time:    0.08852 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.92900 ... TotTime:   87.13000 ... KTRes: 0.00000    
+
+
+TStep: 35    / 64    ... Time:    0.09112 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    35 / 64    ... Time:    0.09112 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.91500 ... TotTime:   90.07700 ... KTRes: 0.00000    
+
+
+TStep: 36    / 64    ... Time:    0.09373 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    36 / 64    ... Time:    0.09373 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.93500 ... TotTime:   92.85700 ... KTRes: 0.00000    
+
+
+TStep: 37    / 64    ... Time:    0.09633 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    37 / 64    ... Time:    0.09633 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.89100 ... TotTime:   95.59100 ... KTRes: 0.00000    
+
+
+TStep: 38    / 64    ... Time:    0.09893 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    38 / 64    ... Time:    0.09893 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87500 ... TotTime:   98.34900 ... KTRes: 0.00000    
+
+
+TStep: 39    / 64    ... Time:    0.10154 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    39 / 64    ... Time:    0.10154 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.90400 ... TotTime:  101.16900 ... KTRes: 0.00000    
+
+
+TStep: 40    / 64    ... Time:    0.10414 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    40 / 64    ... Time:    0.10414 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.90800 ... TotTime:  103.86700 ... KTRes: 0.00000    
+
+
+TStep: 41    / 64    ... Time:    0.10674 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    41 / 64    ... Time:    0.10674 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.88200 ... TotTime:  106.55600 ... KTRes: 0.00000    
+
+
+TStep: 42    / 64    ... Time:    0.10935 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    42 / 64    ... Time:    0.10935 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87500 ... TotTime:  109.37600 ... KTRes: 0.00000    
+
+
+TStep: 43    / 64    ... Time:    0.11195 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    43 / 64    ... Time:    0.11195 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87300 ... TotTime:  112.11800 ... KTRes: 0.00000    
+
+
+TStep: 44    / 64    ... Time:    0.11455 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    44 / 64    ... Time:    0.11455 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.88200 ... TotTime:  114.82100 ... KTRes: 0.00000    
+
+
+TStep: 45    / 64    ... Time:    0.11716 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    45 / 64    ... Time:    0.11716 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87300 ... TotTime:  117.59000 ... KTRes: 0.00000    
+
+
+TStep: 46    / 64    ... Time:    0.11976 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    46 / 64    ... Time:    0.11976 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87000 ... TotTime:  120.34100 ... KTRes: 0.00000    
+
+
+TStep: 47    / 64    ... Time:    0.12236 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    47 / 64    ... Time:    0.12236 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.86100 ... TotTime:  123.16800 ... KTRes: 0.00000    
+
+
+TStep: 48    / 64    ... Time:    0.12497 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    48 / 64    ... Time:    0.12497 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.91000 ... TotTime:  125.87900 ... KTRes: 0.00000    
+
+
+TStep: 49    / 64    ... Time:    0.12757 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    49 / 64    ... Time:    0.12757 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    1.86600 ... TotTime:  128.60800 ... KTRes: 0.00000    
+
+
+TStep: 50    / 64    ... Time:    0.13018 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    50 / 64    ... Time:    0.13018 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87800 ... TotTime:  131.37900 ... KTRes: 0.00000    
+
+
+TStep: 51    / 64    ... Time:    0.13278 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    51 / 64    ... Time:    0.13278 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.88400 ... TotTime:  134.19200 ... KTRes: 0.00000    
+
+
+TStep: 52    / 64    ... Time:    0.13538 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    52 / 64    ... Time:    0.13538 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.93300 ... TotTime:  136.95500 ... KTRes: 0.00000    
+
+
+TStep: 53    / 64    ... Time:    0.13799 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    53 / 64    ... Time:    0.13799 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.90000 ... TotTime:  139.85500 ... KTRes: 0.00000    
+
+
+TStep: 54    / 64    ... Time:    0.14059 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    54 / 64    ... Time:    0.14059 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.91000 ... TotTime:  142.67100 ... KTRes: 0.00000    
+
+
+TStep: 55    / 64    ... Time:    0.14319 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    55 / 64    ... Time:    0.14319 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87900 ... TotTime:  145.50900 ... KTRes: 0.00000    
+
+
+TStep: 56    / 64    ... Time:    0.14580 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    56 / 64    ... Time:    0.14580 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.90200 ... TotTime:  148.29100 ... KTRes: 0.00000    
+
+
+TStep: 57    / 64    ... Time:    0.14840 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    57 / 64    ... Time:    0.14840 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.89400 ... TotTime:  150.99600 ... KTRes: 0.00000    
+
+
+TStep: 58    / 64    ... Time:    0.15100 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    58 / 64    ... Time:    0.15100 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:   -0.09000 ... TotTime:  152.74600 ... KTRes: 0.00000    
+
+
+TStep: 59    / 64    ... Time:    0.15361 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    59 / 64    ... Time:    0.15361 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.88500 ... TotTime:  156.54700 ... KTRes: 0.00000    
+
+
+TStep: 60    / 64    ... Time:    0.15621 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    60 / 64    ... Time:    0.15621 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.88200 ... TotTime:  159.35100 ... KTRes: 0.00000    
+
+
+TStep: 61    / 64    ... Time:    0.15881 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    61 / 64    ... Time:    0.15881 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.85400 ... TotTime:  162.11100 ... KTRes: 0.00000    
+
+
+TStep: 62    / 64    ... Time:    0.16142 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    62 / 64    ... Time:    0.16142 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.91700 ... TotTime:  164.90500 ... KTRes: 0.00000    
+
+
+TStep: 63    / 64    ... Time:    0.16402 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    63 / 64    ... Time:    0.16402 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.87400 ... TotTime:  167.71200 ... KTRes: 0.00000    
+
+
+TStep: 64    / 64    ... Time:    0.16662 ... GMRES Iter:     0 ... Red:  -nan(ind) / -1.00000   ...  Max: -nan(ind)  /    1.00000 ... KTRes: 0.00000    
+TStep:    64 / 64    ... Time:    0.16662 ... GMRES Iter:     1 ... Red:  -nan(ind) / -1.00000   ...  Max:  -nan(ind) / 1.00000    ... STime:    0.85800 ... TotTime:  170.51000 ... KTRes: 0.00000    
+
+
+Averaging and NumberOfTimeSamples_: 20 
+
+Creating quad tree velocity survery data structures... 
+
+Xmin_: -0.822234 
+
+Xmax_: 0.777766 
+
+Ymin_: -1.041400 
+
+Ymax_: 1.041400 
+
+Zmin_: -0.030449 
+
+Zmax_: 0.120551 
+
+Working on quad tree: 1 
+
+Direction, Value: 2 0.000000 
+
+Inserted: 72 points 
+
+CMy_avg: nan 
+
+Total setup and solve time: 173.657000 seconds 
+
 Done

@@ -76,6 +76,11 @@ def testAero():
 
         # Step 3: Set up VSPAERO analysis
         myAnalysis = "VSPAEROSweep"
+
+        analyses = vsp.ListAnalysis()
+        for analysis in analyses:
+            console.print(analysis)
+        vsp.PrintAnalysisInputs("VSPAEROSweep")
         vsp.SetAnalysisInputDefaults(myAnalysis)
 
         # Reference geometry and freestream conditions
@@ -89,7 +94,7 @@ def testAero():
         vsp.SetIntAnalysisInput(myAnalysis, "WakeNumIter", [3])
         # Analysis method
         vsp.SetIntAnalysisInput(myAnalysis, "AnalysisMethod", [vsp.VORTEX_LATTICE])
-        vsp.SetIntAnalysisInput(myAnalysis, "UnsteadyType", [vsp.STABILITY_DEFAULT])
+        vsp.SetIntAnalysisInput(myAnalysis, "UnsteadyType", [2])
         # Update and execute
         vsp.SetStringAnalysisInput(myAnalysis, "RedirectFile", ["log.txt"])
         vsp.SetIntAnalysisInput(myAnalysis, "NCPU", [16])
@@ -99,6 +104,13 @@ def testAero():
         allResults = vsp.ExecAnalysis(myAnalysis)
         timeToSolve = vsp.GetDoubleResults(allResults, "Analysis_Duration_Sec")[0]
         print(f"Analysis completed in {timeToSolve:.2f} seconds.")
+
+        results_names = vsp.GetAllResultsNames()
+        for result in results_names:
+            console.print(result)
+            result_id = vsp.FindLatestResultsID(result)
+        vsp.PrintResults("VSPAERO_Setup")
+        vsp.PrintResults("VSPAERO_Wrapper")
 
         stab_results = vsp.FindLatestResultsID("VSPAERO_Stab")
 
@@ -144,8 +156,7 @@ def visualize_static_margin_with_bar(sm):
         task = progress.add_task("", total=100)
         progress.update(task, completed=normalized_sm)
 
-# Example
-visualize_static_margin_with_bar(25)
+testAero()
 
 
 def list_CS_groups(_):
