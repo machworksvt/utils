@@ -1,8 +1,0 @@
--e utilities
--e degen_geom
--e openvsp_config
--e openvsp
--e CHARM
--e AvlPy
--e pyPMARC
-pytest

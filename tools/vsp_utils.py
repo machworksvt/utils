@@ -158,3 +158,13 @@ def list_CS_groups(_):
         symmetry_type = "Symmetric" if is_symmetric else "Asymmetric"
         symmetric = "Yes" if vsp.GetControlSurfaceGroupSymFlag(i) else "No"
         table.add_row(str(i), group_name, str(num_surfaces), symmetric)
+
+def openGUI(_):
+    """Start the OpenVSP"""
+    if not vsp.IsGUIBuild():
+        console.print("\t[yellow]OpenVSP GUI is not available in this build.[/yellow]")
+        return True
+    vsp.InitGUI()
+    vsp.EnableStopGUIMenuItem()
+    vsp.StartGUI()
+    return True

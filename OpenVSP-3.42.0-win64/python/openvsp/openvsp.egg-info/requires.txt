@@ -1,3 +1,0 @@
-degen_geom
-utilities
-openvsp_config

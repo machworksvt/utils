@@ -32,11 +32,11 @@ def deleteOperatingPoint(args):
         return False
     elif not args[0].isnumeric():
         return False
-    elif not (0 <= int(args[0]) < len(config.operating_points)):
+    elif not (1 <= int(args[0]) <= len(config.operating_points)):
         console.print(f"{OperatingPoint._prefix} Invalid operating point index.")
         return True
     
-    op = config.getOperatingPoint(int(args[0]))
+    op = config.getOperatingPoint(int(args[0]) - 1)
     if op is None:
         console.print(f"{OperatingPoint._prefix} Operating point not found.")
         return True
@@ -49,11 +49,11 @@ def executeOperatingPoint(args):
         return False
     elif not args[0].isnumeric():
         return False
-    elif not (0 <= int(args[0]) < len(config.operating_points)):
+    elif not (1 <= int(args[0]) <= len(config.operating_points)):
         console.print(f"{OperatingPoint._prefix} Invalid operating point index.")
         return True
     
-    op = config.getOperatingPoint(int(args[0]))
+    op = config.getOperatingPoint(int(args[0]) - 1)
     if op is None:
         console.print(f"{OperatingPoint._prefix} Operating point not found.")
         return True
@@ -67,11 +67,11 @@ def editOperatingPoint(args):
         return False
     elif not args[0].isnumeric():
         return False
-    elif not (0 <= int(args[0]) < len(config.operating_points)):
+    elif not (1 <= int(args[0]) <= len(config.operating_points)):
         console.print(f"{OperatingPoint._prefix} Invalid operating point index.")
         return True
     
-    op = config.getOperatingPoint(int(args[0]))
+    op = config.getOperatingPoint(int(args[0]) - 1)
 
     if op is None:
         console.print(f"{OperatingPoint._prefix} Operating point not found.")
@@ -134,6 +134,6 @@ def analyzeStability(args):
         console.print(f"{OperatingPoint._prefix} Operating point has no results. Run it first.")
         return True
 
-    op._printResults()
+    #op._printResults()
     op.analyzeStability()
     return True

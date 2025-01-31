@@ -46,6 +46,37 @@ def testSetControlSurfaceAngles():
     deflection_angle_id = vsp.FindParm( control_group_settings_container_id, "DeflectionAngle", "ControlSurfaceGroup_0" )
     print(vsp.GetParmDescript( deflection_angle_id ))
 
+def testParasite():
+    """Test parasite drag analysis from vsp"""
+    vsp.ReadVSPFile("local.vsp3")
+    analysisString = "ParasiteDrag"
+    vsp.SetAnalysisInputDefaults(analysisString)
+    vsp.SetDoubleAnalysisInput(analysisString, "Altitude", [836])
+    vsp.PrintAnalysisInputs(analysisString)
+    """
+        Relevant analyiss inputs:
+            Altitude                      double         1       20000.000000
+            Density                       double         1       0.076470
+            DynaVisc                      double         1       0.000000
+            GeomSet                       integer        1       1
+            Mach                          double         1       0.000000
+            Pressure                      double         1       2116.221000
+            Re_L                          double         1       0.000000
+            TempUnit                      integer        1       2
+            Temperature                   double         1       288.150000
+            Vinf                          double         1       500.000000
+        What do these mean/do?
+            DeltaTemp                     double         1       0.000000
+            ExportSubCompFlag             boolean        1
+            LamCfEqnChoice                integer        1       0
+            LengthUnit                    integer        1       4
+            RecomputeGeom                 boolean        1
+            TurbCfEqnChoice               integer        1       10
+
+            
+            LEN_M = 2
+    """
+
 
 def testAero():
     # Step 1: Load the VSP model
@@ -156,7 +187,7 @@ def visualize_static_margin_with_bar(sm):
         task = progress.add_task("", total=100)
         progress.update(task, completed=normalized_sm)
 
-testAero()
+#testAero()
 
 
 def list_CS_groups(_):
@@ -202,7 +233,7 @@ def list_CS_groups(_):
 
     console.print(table)
 
-
+testParasite()
 
 
 

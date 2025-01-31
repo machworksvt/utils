@@ -1,5 +1,6 @@
 import openvsp_config
-
+openvsp_config.LOAD_GRAPHICS = True
+openvsp_config.LOAD_FACADE = True
 import openvsp as vsp
 import os
 
@@ -21,6 +22,8 @@ from rich.table import Table
                     Hi-Lift -> Takeoff/Landing Speeds and Ranges
             Enable dynamic stability analyses
         Get results better importing and exporting of results
+
+    TODO: Tail volume ratio
 
 
         Gitignore results files
@@ -140,6 +143,10 @@ menustructure = {
                 "desc": "Enter aerodynamics menu",
                 "action": enterAeroMenu
             },
+            "gui" : {
+                "desc": "Open the VSP GUI",
+                "action": utils.openGUI
+            }
         }
     },
     "aero":{

@@ -1,0 +1,555 @@
+{
+ "vsp3_file": "local.vsp3",
+ "settings": {
+  "vsp_path": "../OpenVSP-3.41.1-win64/vsp.exe",
+  "type": "IV",
+  "num_procs": 16
+ },
+ "operating_points": [
+  {
+   "name": "Cruise",
+   "settings": {
+    "max_iterations": 5,
+    "tolerance": 0.001,
+    "type": "cruise"
+   },
+   "genparms": {
+    "load_factor": {
+     "value": 1.0,
+     "calculated": false,
+     "units": "",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    },
+    "Re": {
+     "value": 763869.9808202654,
+     "calculated": true,
+     "units": "",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    },
+    "Mach": {
+     "value": 0.13261321866539216,
+     "calculated": true,
+     "units": "",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    },
+    "massconfig_index": {
+     "value": 0,
+     "calculated": false,
+     "units": "",
+     "required": true,
+     "limits": [
+      -1,
+      -1
+     ]
+    }
+   },
+   "fsparms": {
+    "velocity": {
+     "value": 44.7,
+     "calculated": false,
+     "units": "m/s",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    },
+    "density": {
+     "value": 1.1296714332268378,
+     "calculated": true,
+     "units": "kg/m^3",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    },
+    "dynamic_viscosity": {
+     "value": 1.763044370461812e-05,
+     "calculated": true,
+     "units": "bruh",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    },
+    "speed_of_sound": {
+     "value": 337.07047042411676,
+     "calculated": true,
+     "units": "m/s",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    },
+    "altitude": {
+     "value": 836.0,
+     "calculated": false,
+     "units": "m MSL",
+     "required": false,
+     "limits": [
+      -1,
+      -1
+     ]
+    },
+    "pressure": {
+     "value": 91678.08334902598,
+     "calculated": true,
+     "units": "Pa",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    },
+    "temperature": {
+     "value": 282.7167145499199,
+     "calculated": true,
+     "units": "K",
+     "required": true,
+     "limits": [
+      0,
+      -1
+     ]
+    }
+   },
+   "tparms": {},
+   "inputs": {
+    "alpha": {
+     "value": null,
+     "driver": "CL"
+    },
+    "beta": {
+     "value": 0.0,
+     "driver": "fixed"
+    }
+   },
+   "outputs": {
+    "CL": {
+     "value": 0.25028387849217015,
+     "driver": "fixed"
+    },
+    "CY": {
+     "value": null,
+     "driver": "free"
+    },
+    "Cl": {
+     "value": null,
+     "driver": "free"
+    },
+    "Cm": {
+     "value": 0.0,
+     "driver": "fixed"
+    },
+    "Cn": {
+     "value": null,
+     "driver": "free"
+    }
+   },
+   "controls": {
+    "Ailerons": {
+     "value": 0.0,
+     "driver": "fixed",
+     "details": {
+      "id": 0,
+      "num_surfaces": 2,
+      "surface_names": [
+       "MainWing_Surf0_Ailerons",
+       "MainWing_Surf1_Ailerons"
+      ]
+     }
+    },
+    "FF_Elevator": {
+     "value": null,
+     "driver": "Cm",
+     "details": {
+      "id": 1,
+      "num_surfaces": 2,
+      "surface_names": [
+       "Elevator_Surf0_SS_CONT_0",
+       "Elevator_Surf1_SS_CONT_0"
+      ]
+     }
+    },
+    "RV_Pitch": {
+     "value": 0.0,
+     "driver": "fixed",
+     "details": {
+      "id": 2,
+      "num_surfaces": 2,
+      "surface_names": [
+       "VTail_Surf0_Ruddervators",
+       "VTail_Surf1_Ruddervators"
+      ]
+     }
+    },
+    "RV_Yaw": {
+     "value": 0.0,
+     "driver": "fixed",
+     "details": {
+      "id": 3,
+      "num_surfaces": 2,
+      "surface_names": [
+       "VTail_Surf0_Ruddervators",
+       "VTail_Surf1_Ruddervators"
+      ]
+     }
+    },
+    "Flaps": {
+     "value": 0.0,
+     "driver": "fixed",
+     "details": {
+      "id": 4,
+      "num_surfaces": 2,
+      "surface_names": [
+       "MainWing_Surf0_Flaps",
+       "MainWing_Surf1_Flaps"
+      ]
+     }
+    }
+   },
+   "hasResults": true,
+   "modifiedSinceLastExec": false,
+   "isConverged": true,
+   "results": {
+    "stability": {
+     "SM": 0.2327553,
+     "X_NP": 0.0320758,
+     "final_inputs": {
+      "index": [
+       0
+      ],
+      "columns": [
+       "alpha",
+       "beta",
+       "Ailerons",
+       "FF_Elevator",
+       "RV_Pitch",
+       "RV_Yaw",
+       "Flaps"
+      ],
+      "data": [
+       [
+        2.7875221290579915,
+        0.0,
+        0.0,
+        -6.740372794765172,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ]
+     },
+     "base_case_stability_axes": {
+      "index": [
+       0
+      ],
+      "columns": [
+       "CD",
+       "CY",
+       "CL",
+       "Cl",
+       "Cm",
+       "Cn"
+      ],
+      "data": [
+       [
+        0.0172097,
+        1.1e-06,
+        0.2506382,
+        9.8e-06,
+        -0.0005584,
+        -2.22e-05
+       ]
+      ]
+     },
+     "derivs_stability_axes": {
+      "index": [
+       "CD",
+       "CY",
+       "CL",
+       "Cl",
+       "Cm",
+       "Cn"
+      ],
+      "columns": [
+       "alpha",
+       "beta",
+       "Ailerons",
+       "FF_Elevator",
+       "RV_Pitch",
+       "RV_Yaw",
+       "Flaps",
+       "p",
+       "q",
+       "r",
+       "U",
+       "Mach"
+      ],
+      "data": [
+       [
+        0.1306249,
+        0.0017397,
+        0.0022019,
+        -0.005158,
+        0.0033328,
+        0.000451,
+        -0.0248605,
+        -0.0205408,
+        0.063032,
+        -0.0009567,
+        0.0001346,
+        0.0010147
+       ],
+       [
+        -0.0047566,
+        -0.2075625,
+        -0.0585576,
+        0.0003864,
+        -0.0009955,
+        -0.1040695,
+        0.0008855,
+        -0.1697244,
+        0.0038567,
+        0.1398337,
+        1.98e-05,
+        0.0001492
+       ],
+       [
+        5.2979073,
+        0.0121075,
+        0.0047163,
+        0.2551673,
+        0.0549239,
+        -0.0062154,
+        -1.3096578,
+        -0.0010918,
+        8.8458661,
+        -0.0066678,
+        0.0055806,
+        0.0420819
+       ],
+       [
+        -0.0002517,
+        -0.1164957,
+        -0.2472794,
+        0.0003457,
+        0.0018665,
+        -0.0078959,
+        -0.000426,
+        -0.6391712,
+        -0.0024715,
+        0.0708012,
+        -1.2e-05,
+        -9.07e-05
+       ],
+       [
+        -1.2331162,
+        0.0236139,
+        -0.0147421,
+        -0.5435059,
+        -0.0499876,
+        -0.000747,
+        0.1693529,
+        -0.0315975,
+        -6.580299,
+        -0.0225322,
+        -0.0010349,
+        -0.0078037
+       ],
+       [
+        0.0027464,
+        0.0171451,
+        -0.0007579,
+        0.001811,
+        -0.0214902,
+        0.0343581,
+        0.0010422,
+        -0.0461097,
+        0.0069266,
+        -0.0434001,
+        8.2e-05,
+        0.0006184
+       ]
+      ]
+     },
+     "base_case_body_axes": {
+      "index": [
+       0
+      ],
+      "columns": [
+       "CFx",
+       "CFy",
+       "CFz",
+       "CMx",
+       "CMy",
+       "CMz"
+      ],
+      "data": [
+       [
+        0.0050003,
+        1.1e-06,
+        0.2511785,
+        -9.8e-06,
+        -0.0005584,
+        2.22e-05
+       ]
+      ]
+     },
+     "derivs_body_axes": {
+      "index": [
+       "CFx",
+       "CFy",
+       "CFz",
+       "CMx",
+       "CMy",
+       "CMz"
+      ],
+      "columns": [
+       "alpha",
+       "beta",
+       "Ailerons",
+       "FF_Elevator",
+       "RV_Pitch",
+       "RV_Yaw",
+       "Flaps",
+       "p",
+       "q",
+       "r",
+       "U",
+       "Mach"
+      ],
+      "data": [
+       [
+        -0.4708315,
+        -0.0026185,
+        0.0019699,
+        -0.0175612,
+        0.0006578,
+        0.0007527,
+        0.0388605,
+        -0.0204634,
+        -0.367237,
+        -0.0006313,
+        -0.000137,
+        -0.0010331
+       ],
+       [
+        -0.0047566,
+        -0.2247701,
+        -0.0585576,
+        0.0003864,
+        -0.0009955,
+        -0.1040695,
+        0.0008855,
+        -0.1697244,
+        0.0038567,
+        0.1398337,
+        1.98e-05,
+        0.0001492
+       ],
+       [
+        5.2977728,
+        0.0119943,
+        0.0048178,
+        0.2546145,
+        0.0550209,
+        -0.0061861,
+        -1.3093172,
+        -0.0020895,
+        8.8384646,
+        -0.0067064,
+        0.0055805,
+        0.0420815
+       ],
+       [
+        0.0002517,
+        0.1164957,
+        0.2472794,
+        -0.0003457,
+        -0.0018665,
+        0.0078959,
+        0.000426,
+        0.6391712,
+        0.0024715,
+        -0.0708012,
+        1.2e-05,
+        9.07e-05
+       ],
+       [
+        -1.2331162,
+        0.0236139,
+        -0.0147421,
+        -0.5435059,
+        -0.0499876,
+        -0.000747,
+        0.1693529,
+        -0.0315975,
+        -6.580299,
+        -0.0225322,
+        -0.0010349,
+        -0.0078037
+       ],
+       [
+        -0.0027464,
+        -0.0171451,
+        0.0007579,
+        -0.001811,
+        0.0214902,
+        -0.0343581,
+        -0.0010422,
+        0.0461097,
+        -0.0069266,
+        0.0434001,
+        -8.2e-05,
+        -0.0006184
+       ]
+      ]
+     }
+    }
+   }
+  }
+ ],
+ "massConfigurations": [
+  {
+   "name": "Full",
+   "cg": [
+    -0.03,
+    0.0,
+    0.0
+   ],
+   "mass": 16.0,
+   "inertia_matrix": [
+    [
+     5.0,
+     0.0,
+     0.1
+    ],
+    [
+     0.0,
+     4.0,
+     0.0
+    ],
+    [
+     0.1,
+     0.0,
+     5.0
+    ]
+   ]
+  }
+ ]
+}

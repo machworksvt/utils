@@ -1,0 +1,10 @@
+utilities
+scipy
+numpy
+matplotlib
+pandas
+pyautogui
+opencv-python
+fortranformat
+multiprocessing-logging
+Pillow

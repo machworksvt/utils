@@ -1,0 +1,16 @@
+Metadata-Version: 2.2
+Name: avlpy
+Version: 0.1
+Summary: AVL with python wrapper
+Home-page: 
+Author: 
+Author-email: 
+License: MIT
+Requires-Dist: airfoils
+Requires-Dist: numpy
+Requires-Dist: scipy
+Requires-Dist: utilities
+Requires-Dist: fortranformat
+Dynamic: license
+Dynamic: requires-dist
+Dynamic: summary

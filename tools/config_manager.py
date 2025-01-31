@@ -15,8 +15,19 @@ from ambiance import Atmosphere
 from scipy import constants
 import pandas as pd
 import threading
+import matplotlib.pyplot as plt
+
 
 console = None
+
+"""
+TODO:
+    Fix CD results giving NaN
+    Finish implementing the hi-lift operating point
+    Actually fix the dynamic system matrix generation
+    Implement the powerplant class
+    Improve the mass configuration class
+"""
 
 class ConfigurationManager:
     """Manages configuration of the program"""
@@ -143,9 +154,6 @@ class ConfigurationManager:
         else:
             self.operating_points.append(op)
             console.print(f"{self._prefix} Operating point added. Have {len(self.operating_points)} total.")
-    
-    def getControls():
-        vsp.GetNumControlSurfaceGroups
 
     #Mass part
     def addMassConfiguration(self, massConfig):
@@ -205,7 +213,7 @@ class PowerPlant:
 
     #TODO: Implement
 
-    _prefix = "[bold orange]\t<powerplant>[/bold orange]"
+    _prefix = "[bold dark_orange3]\t<powerplant>[/bold dark_orange3]"
 
     def __init__(self, name="Powerplant"):
         self.name = name
@@ -247,7 +255,8 @@ class MassConfiguration:
     def __str__(self):
         return (f"MassConfiguration(name={self.name}, mass={self.mass:.2f}, cg={self.cg}, "
                 f"inertia_matrix={self.inertia_matrix}")
-        
+
+# Where most of the business happens vv      
 class OperatingPoint:
     """Most generic definition of an operating point possible. Just enough to run a vspaero analysis"""
 
@@ -341,7 +350,6 @@ class OperatingPoint:
 
         
         Leverage default functionality for unitless quanitites
-    
     """
     _freestream_parameters_defaults = {
         "velocity":{
@@ -378,6 +386,20 @@ class OperatingPoint:
             "units":"m MSL",
             "required":False,
             "limits": (-1, -1)
+        },
+        "pressure":{
+            "value":101.3*10**3,
+            "calculated":False,
+            "units":"Pa",
+            "required":True,
+            "limits": (0, -1)
+        },
+        "temperature":{
+            "value":288.15,
+            "calculated":False,
+            "units":"K",
+            "required":True,
+            "limits": (0, -1)
         }
     }
     _generic_parameters_defaults = {
@@ -412,7 +434,7 @@ class OperatingPoint:
     }
     _OPERATING_POINT_TEMPLATES = {
         "cruise":{
-            "description" : "Simple steady wing-level nonclimbing flight",
+            "description" : "Simple steady wing-level nonclimbing flight. Also use this for specific tests.",
             "required_parameters": {}
         },
         "climb":{
@@ -434,7 +456,8 @@ class OperatingPoint:
             "description": "High-lift configuration (CL treated as CLmax)",
             "required_parameters": {
                 "ground_effect_distance":{"value":None,"calculated":False,"units":"m","required":True, "limits": (0,-1)},
-                "CLmax":{"value":None,"calculated":False,"units":"","required":True, "limits": (0, -1)}
+                "rolling_friction_coeff":{"value":None,"calculated":False,"units":"","required":True, "limits": (0,-1)},
+                "runway_length":{"value":None,"calculated":False,"units":"m","required":True, "limits": (0,-1)},
             }
         }
     }
@@ -561,7 +584,7 @@ class OperatingPoint:
             firstColumn = f"{name}{'*' if param['required'] else ''}"
             if param['units'] != "":
                 firstColumn += f" ({param['units']})"
-            secondColumn = f"{param['value'] if not (param['value'] is None) else '---'}"
+            secondColumn = f"{param['value']:.3g}" if not (param['value'] is None) else '---'
             if param['calculated']:
                 secondColumn = "[green]" + secondColumn + "[/green]"
             genparmstable.add_row(firstColumn, secondColumn)
@@ -575,7 +598,7 @@ class OperatingPoint:
             firstColumn = f"{name}{'*' if param['required'] else ''}"
             if param['units'] != "":
                 firstColumn += f" ({param['units']})"
-            secondColumn = f"{param['value'] if not (param['value'] is None) else '---'}"
+            secondColumn = f"{param['value']:.3g}" if not (param['value'] is None) else '---'
             if param['calculated']:
                 secondColumn = "[green]" + secondColumn + "[/green]"
             fsparmstable.add_row(firstColumn, secondColumn)
@@ -590,7 +613,7 @@ class OperatingPoint:
                 firstColumn = f"{name}{'*' if param['required'] else ''}"
                 if param['units'] != "":
                     firstColumn += f" ({param['units']})"
-                secondColumn = f"{param['value'] if not (param['value'] is None) else '---'}"
+                secondColumn = f"{param['value']:.3g}" if not (param['value'] is None) else '---'
                 if param['calculated']:
                     secondColumn = "[green]" + secondColumn + "[/green]"
                 typeparmstable.add_row(firstColumn, secondColumn)
@@ -640,7 +663,7 @@ class OperatingPoint:
             table4.add_row("", f"{massConfig.inertia_matrix[2, 0]:.3f}, {massConfig.inertia_matrix[2, 1]:.3f}, {massConfig.inertia_matrix[2, 2]:.3f}")
             tableList.append(table4)
 
-        console.print(Columns(tableList, padding=(0, 1)))
+        console.print(Padding(Columns(tableList, padding=(0, 1)), (0, 0, 0, 8)))
     
     def isReady(self):
         """Check if the operating point is ready to be executed"""
@@ -654,7 +677,20 @@ class OperatingPoint:
         #TODO: Improve this to handle errors, also eventually add panel method
         """Compute the geometry for the operating point"""
         analysisString = "VSPAEROComputeGeometry"
-        console.print(f"{self._prefix} Computing geometry for operating point '{self.name}' ... ", end="")
+        console.print(f"{self._prefix} Computing geometry for operating point '{self.name}' ... ")
+        # Set static parameters
+        console.print(f"{self._prefix} Including Geometries:")
+        geom_ids = vsp.FindGeoms()
+        table = Table(title="Geometries", show_header=False, box=None)
+        table.add_column("Name", style="magenta")
+        table.add_column("Geom ID", style="cyan")
+        for geom_id in geom_ids:
+            name = vsp.GetGeomName(geom_id)
+            in_set_0 = vsp.GetSetFlag(geom_id, 1)  # Check if in Set 0
+            if in_set_0:
+                table.add_row(name, geom_id)
+
+        console.print(Padding(table, (0, 0, 0, 12)))
         vsp.SetAnalysisInputDefaults(analysisString)
         vsp.SetIntAnalysisInput(analysisString, "AnalysisMethod", [vsp.VORTEX_LATTICE])
         vsp.SetIntAnalysisInput(analysisString, "GeomSet", [1])
@@ -662,7 +698,7 @@ class OperatingPoint:
         allResults = vsp.ExecAnalysis(analysisString)
         outputFileName = vsp.GetStringResults(allResults, "DegenGeomFileName")[0]
         timeToComplete = vsp.GetDoubleResults(allResults, "Analysis_Duration_Sec")[0]
-        console.print(f"Done in {timeToComplete:.2f} seconds. File saved as '{outputFileName}'")
+        console.print(f"{self._prefix} Done in {timeToComplete:.2f} seconds. File saved as '{outputFileName}'")
         return True
 
     def exec(self):
@@ -675,6 +711,9 @@ class OperatingPoint:
             if confirm != "y":
                 console.print(f"{self._prefix} Execution aborted.")
                 return False
+        if vsp.IsGUIBuild() and vsp.IsGUIRunning():
+            console.print(f"{self._prefix} GUI Locked during duration of execution.")
+            vsp.Lock()
         console.print(f"{self._prefix}[bold] Executing operating point '{self.name}'[/bold]")
         self.computeGeometry()
         console.print(f"{self._prefix} Starting trimming process: '{self.name}' ... (this is unfortunately extremely slow and may take a few minutes for a complex operating point :/)")
@@ -715,11 +754,17 @@ class OperatingPoint:
             console.print(f"{self._prefix} Trimming successful. Results stored")
             self.hasResults = True
             self._collectAllResults()
-            self._printResults()
+            #self._printResults()
             #Print some results
         else: #Trimming failed
             console.print(f"{self._prefix} Trimming failed. Adjust your settings or try again.")
             self.hasResults = False
+
+        if vsp.IsGUIBuild() and vsp.IsGUIRunning():
+            console.print(f"{self._prefix} GUI Unlocked")
+            vsp.Unlock()
+
+        # Run parasite drag analysis
 
         self.modifiedSinceLastExec = False
 
@@ -742,8 +787,8 @@ class OperatingPoint:
         for col in self._historyDF.columns:
             table.add_column(col)
         for _, row in self._historyDF.iterrows():
-            table.add_row(*[f"{val:.2f}" if pd.notna(val) else "..." for val in row.values])
-        return table
+            table.add_row(*[f"{val:.3f}" if pd.notna(val) else "..." for val in row.values])
+        return Padding(table, (0, 0, 0, 12))
 
     def _setInitialGuess(self):
         """Set initial guess for inputs with no value and initialize the history dataframe"""
@@ -752,6 +797,9 @@ class OperatingPoint:
         for key in self.inputs.keys():
             if self.inputs[key]["value"] is None:
                 self._historyDF[key] = [self._referenceDict[key]["initial_guess"]]
+                if key == "alpha" and self.inputs['alpha']['driver'] != 'fixed' and self.outputs['CL']['value'] is not None:
+                    #Special alpha->CL relationship guess ideal lift slope of 2pi (often over-guesses but that's fine)
+                    self._historyDF[key] = [self.outputs['CL']['value']/(180)]
             else: 
                 self._historyDF[key] = [self.inputs[key]["value"]]
         for key in self.controls.keys():
@@ -846,11 +894,17 @@ class OperatingPoint:
         """Single iteration of simulation"""
         analysisString = "VSPAEROSweep"
         vsp.SetAnalysisInputDefaults(analysisString)
-        
-        # Set static parameters
+        vsp.SetIntAnalysisInput(analysisString, "UseModeFlag", [False])
         vsp.SetIntAnalysisInput(analysisString, "GeomSet", [1])  # Use Set 0
         vsp.SetDoubleAnalysisInput(analysisString, "MachStart", [self.getParameter("Mach")['value']])
+        vsp.SetIntAnalysisInput(analysisString, "MachNpts", [1])
+        vsp.SetDoubleAnalysisInput(analysisString, "MachEnd", [self.getParameter("Mach")['value']])
+        vsp.SetDoubleAnalysisInput(analysisString, "Machref", [self.getParameter("Mach")['value']])
+
         vsp.SetDoubleAnalysisInput(analysisString, "ReCref", [self.getParameter("Re")['value']]) 
+        vsp.SetDoubleAnalysisInput(analysisString, "ReCrefNpts", [1])
+        vsp.SetDoubleAnalysisInput(analysisString, "ReCrefEnd", [self.getParameter("Re")['value']]) 
+
         vsp.SetDoubleAnalysisInput(analysisString, "Vinf", [self.getParameter("velocity")['value']])
         vsp.SetDoubleAnalysisInput(analysisString, "Vref", [self.getParameter("velocity")['value']])
         vsp.SetDoubleAnalysisInput(analysisString, "Rho", [self.getParameter("density")['value']])
@@ -859,13 +913,18 @@ class OperatingPoint:
         vsp.SetDoubleAnalysisInput(analysisString, "Ycg", [mconfig.cg[1]])
         vsp.SetDoubleAnalysisInput(analysisString, "Zcg", [mconfig.cg[2]])
 
+        if self.settings["type"] == "hilift":
+            vsp.SetIntAnalysisInput(analysisString, "GroundEffectToggle", [True])
+            vsp.SetDoubleAnalysisInput(analysisString, "GroundEffect", [self.getParameter("ground_effect_distance")['value']])
 
-        vsp.SetStringAnalysisInput(analysisString, "RedirectFile", [""])
+
+        vsp.SetStringAnalysisInput(analysisString, "RedirectFile", ["log.txt"])
 
         vsp.SetIntAnalysisInput(analysisString, "AnalysisMethod", [vsp.VORTEX_LATTICE])
         vsp.SetIntAnalysisInput(analysisString, "NCPU", [config.settings["num_procs"]])
         vsp.SetIntAnalysisInput(analysisString, "UnsteadyType", [vsp.STABILITY_DEFAULT])
-        vsp.SetIntAnalysisInput(analysisString, "2DFEMFlag", [0])
+        vsp.SetIntAnalysisInput(analysisString, "2DFEMFlag", [False])
+        
 
         # Set inputs that change from iteration to iteration
         vsp.SetDoubleAnalysisInput(analysisString, "AlphaStart", [self._getNextInput("alpha")])
@@ -875,6 +934,7 @@ class OperatingPoint:
         vsp.SetDoubleAnalysisInput(analysisString, "BetaStart", [self._getNextInput("beta")])
         vsp.SetIntAnalysisInput(analysisString, "BetaNpts", [1])
         vsp.SetDoubleAnalysisInput(analysisString, "BetaEnd", [self._getNextInput("beta")])
+        #vsp.PrintAnalysisInputs(analysisString)
         control_group_settings_container = vsp.FindContainer("VSPAEROSettings",0)
         for key in self.controls.keys():
             #need to get ID of control group
@@ -893,12 +953,84 @@ class OperatingPoint:
         except Exception as e:
             console.print(f"{self._prefix} Error during simulation: {e}")
             self._recentResultID = None
+
+        """
+           [input_name]                  [type]         [#]     [current values-->]
+            2DFEMFlag                     boolean        1
+            ActuatorDiskFlag              boolean        1
+            AlphaEnd                      double         1       10.000000 
+            AlphaNpts                     integer        1       3 
+            AlphaStart                    double         1       0.000000 
+            AlternateInputFormatFlag      boolean        1
+            AnalysisMethod                integer        1       0 
+            AutoTimeNumRevs               integer        1       5 
+            AutoTimeStepFlag              boolean        1
+            BetaEnd                       double         1       0.000000 
+            BetaNpts                      integer        1       1 
+            BetaStart                     double         1       0.000000 
+            CGDegenSet                    integer        1       -1 
+            CGGeomSet                     integer        1       1 
+            CGModeID                      string         1        
+            Clmax                         double         1       -1.000000 
+            ClmaxToggle                   integer        1       0
+            FarDist                       double         1       -1.000000
+            FarDistToggle                 boolean        1
+            FixedWakeFlag                 boolean        1
+            FromSteadyState               boolean        1
+            GeomSet                       integer        1       1
+            GroundEffect                  double         1       -1.000000
+            GroundEffectToggle            boolean        1
+            HoverRamp                     double         1       0.000000
+            HoverRampFlag                 boolean        1
+            KTCorrection                  boolean        1
+            MACFlag                       boolean        1
+            MachEnd                       double         1       0.000000
+            MachNpts                      integer        1       1 
+            MachStart                     double         1       0.000000
+            Machref                       double         1       0.300000
+            ManualVrefFlag                boolean        1
+            MassSliceDir                  integer        1       0
+            MaxTurnAngle                  double         1       -1.000000
+            MaxTurnToggle                 boolean        1
+            ModeID                        string         1
+            NCPU                          integer        1       4
+            NoiseCalcFlag                 boolean        1
+            NoiseCalcType                 integer        1       0
+            NoiseUnits                    integer        1       0
+            NumMassSlice                  integer        1       10
+            NumTimeSteps                  integer        1       25
+            NumWakeNodes                  integer        1       64
+            Precondition                  integer        1       0
+            ReCref                        double         1       10000000.000000
+            ReCrefEnd                     double         1       20000000.000000
+            ReCrefNpts                    integer        1       1 
+            RedirectFile                  string         1       stdout
+            RefFlag                       integer        1       0
+            Rho                           double         1       0.002377
+            RotateBladesFlag              boolean        1
+            ScurveFlag                    boolean        1
+            Sref                          double         1       100.000000
+            Symmetry                      boolean        1
+            TimeStepSize                  double         1       0.001000
+            UnsteadyType                  integer        1       0 
+            UseCGModeFlag                 boolean        1
+            UseModeFlag                   boolean        1
+            Vinf                          double         1       100.000000
+            Vref                          double         1       100.000000
+            WakeNumIter                   integer        1       3
+            WingID                        boolean        1
+            Xcg                           double         1       0.000000
+            Ycg                           double         1       0.000000
+            Zcg                           double         1       0.000000
+            bref                          double         1       1.000000
+            cref                          double         1       1.000000
+            """
  
     def _processTrimResults(self):
         """Process the stability results"""
-        resultsNames = vsp.GetAllResultsNames()
-        for name in resultsNames:
-            console.print(f"{self._prefix} {name}")
+        #resultsNames = vsp.GetAllResultsNames()
+        #for name in resultsNames:
+        #    console.print(f"{self._prefix} {name}")
         stab_results = vsp.FindLatestResultsID("VSPAERO_Stab")
         #Pull the base case results
         #console.print(f"{self._prefix} SM: {SM}, X_NP: {X_NP}")
@@ -947,38 +1079,32 @@ class OperatingPoint:
 
         # Record outputs in stability axes
         prefix = "Base_Aero"
-        base_case_stability_axes = pd.DataFrame(columns=[*self.outputs.keys()], dtype=float)
+        base_case_stability_axes = pd.DataFrame(columns=["CD", "CY", "CL", "Cl", "Cm", "Cn"], dtype=float)
         for col in base_case_stability_axes.columns:
             result_name = f"{prefix}_{self._getVSPAEROName(col)}"
             result_value = float(vsp.GetDoubleResults(stab_results_id, result_name)[0])
             base_case_stability_axes.loc[0, col] = result_value
 
-        base_case_body_axes = pd.DataFrame(columns=["CFx", "CFy", "CFz", "CMx", "CMy", "CMz"])
+        base_case_body_axes = pd.DataFrame(columns=["CFx", "CFy", "CFz", "CMx", "CMy", "CMz"], dtype=float)
         for col in base_case_body_axes.columns:
             result_name = f"{prefix}_{col}"
             result_value = float(vsp.GetDoubleResults(stab_results_id, result_name)[0])
             base_case_body_axes.loc[0, col] = result_value
         
         #Pull derivatives matrix (stability axes)
-        derivs_stability_axes = pd.DataFrame(columns=[*self.inputs.keys(), *self.controls.keys(), "p", "q", "r", "U", "Mach"], index=[*self.outputs.keys()], dtype=float)
+        derivs_stability_axes = pd.DataFrame(columns=[*self.inputs.keys(), *self.controls.keys(), "p", "q", "r", "U", "Mach"], index=["CD", "CY", "CL", "Cl", "Cm", "Cn"], dtype=float)
         for input in derivs_stability_axes.columns:
-            for i, output in enumerate(self.outputs.keys()):
+            for i, output in enumerate(["CD", "CY", "CL", "Cl", "Cm", "Cn"]):
                 derivativename = f"{self._getVSPAEROName(output)}_{self._getVSPAEROName(input)}"
                 #console.print(f"{derivativename}")
-                if not (input == "U" or input == "Mach"):
-                    derivs_stability_axes.loc[output, input] = np.deg2rad(vsp.GetDoubleResults(stab_results_id, derivativename)[0])
-                else:
-                    derivs_stability_axes.loc[output, input] = float(vsp.GetDoubleResults(stab_results_id, derivativename)[0])
+                derivs_stability_axes.loc[output, input] = float(vsp.GetDoubleResults(stab_results_id, derivativename)[0])
 
         derivs_body_axes = pd.DataFrame(columns=[*self.inputs.keys(), *self.controls.keys(), "p", "q", "r", "U", "Mach"], index=["CFx", "CFy", "CFz", "CMx", "CMy", "CMz"], dtype=float)
         for input in derivs_body_axes.columns:
             for output in derivs_body_axes.index:
                 derivativename = f"{output}_{self._getVSPAEROName(input)}"
                 #console.print(f"{derivativename}")
-                if not (input == "U" or input == "Mach"):
-                    derivs_body_axes.loc[output, input] = np.deg2rad(vsp.GetDoubleResults(stab_results_id, derivativename)[0])
-                else:
-                    derivs_body_axes.loc[output, input] = float(vsp.GetDoubleResults(stab_results_id, derivativename)[0])
+                derivs_body_axes.loc[output, input] = float(vsp.GetDoubleResults(stab_results_id, derivativename)[0])
         
         
         # TODO: Loading Results
@@ -1118,7 +1244,7 @@ class OperatingPoint:
         # Now treat special cases
         #TODO: Check values
         if parameter == "altitude":
-            confirm = console.input(f"{self._prefix} Set density, viscosity and speed of sound to ISA standard at {value} m? (y/n): ").strip().lower()
+            confirm = console.input(f"{self._prefix} Set density, viscosity, speed of sound, ambient pressure and temperature to ISA standard at {value} m? (y/n): ").strip().lower()
             if confirm == "y":
                 atmosphere = Atmosphere(float(value))
                 self._setParameter("density", atmosphere.density[0])
@@ -1127,7 +1253,11 @@ class OperatingPoint:
                 self._setCalculated("dynamic_viscosity", True)
                 self._setParameter("speed_of_sound", atmosphere.speed_of_sound[0])
                 self._setCalculated("speed_of_sound", True)
-                console.print(f"{self._prefix} Density, viscosity and speed of sound set to ISA standard at {value} m.")
+                self._setParameter("pressure", atmosphere.pressure[0])
+                self._setCalculated("pressure", True)
+                self._setParameter("temperature", atmosphere.temperature[0])
+                self._setCalculated("temperature", True)
+                console.print(f"{self._prefix} Density, viscosity, speed of sound, ambient pressure and temperature set to ISA standard at {value} m.")
         elif parameter == "Mach":
             if 0.7 < float(value) < 1.25: #TODO: Add/integrate 2D transonic analysis capability from xfoil
                 console.print(f"{self._prefix} [yellow]Warning: Transonic analysis (Mach 0.7 - 1.25) is not supported and may not work correctly.[/yellow]")
@@ -1135,7 +1265,7 @@ class OperatingPoint:
             if not self.getParameter("velocity")['value'] is None:
                 rate_of_turn = self.getParameter("rate_of_turn")['value']
                 velocity = self.getParameter("velocity")['value']
-                bank_angle_deg = np.rad2deg(np.atan(rate_of_turn*velocity/constants.g))
+                bank_angle_deg = np.rad2deg(np.atan(np.deg2rad(rate_of_turn)*velocity/constants.g))
                 self._setParameter("bank_angle", bank_angle_deg)
                 self._setCalculated("bank_angle", True)
                 turn_radius = (velocity**2)/(constants.g * np.tan(bank_angle_deg))
@@ -1149,8 +1279,8 @@ class OperatingPoint:
                 self._setParameter("bank_angle", bank_angle_deg)
                 self._setCalculated("bank_angle", True)
                 rate_of_turn = constants.g/velocity * np.rad2deg(np.tan(np.deg2rad(bank_angle_deg)))
-                self._setParameter("turn_radius", turn_radius)
-                self._setCalculated("turn_radius", True)
+                self._setParameter("rate_of_turn", rate_of_turn)
+                self._setCalculated("rate_of_turn", True)
         elif parameter == "bank_angle":
             if not self.getParameter("velocity")['value'] is None:
                 bank_angle_deg = self.getParameter("bank_angle")['value']
@@ -1322,100 +1452,320 @@ class OperatingPoint:
     
         #Dimensionalize quantities
 
-        q_inf = 0.5 * self.getParameter("density") * self.getParameter("velocity") ** 2
+        q_inf = 0.5 * self.getParameter("density")['value'] * self.getParameter("velocity")['value'] ** 2
         refArea = config.getReferenceQuantities()["refArea"]
         refSpan = config.getReferenceQuantities()["refSpan"]
         refChord = config.getReferenceQuantities()["refChord"]
-        console.print(f"{self._prefix} q_inf: {q_inf:.3f} Pa")
-        console.print(f"{self._prefix} Reference Area: {refArea:.3f} m^2")
-        console.print(f"{self._prefix} Reference Span: {refSpan:.3f} m")
-        console.print(f"{self._prefix} Reference Chord: {refChord:.3f} m")
+        # Print out in table form
+        console.print(f"{self._prefix} Operating Point '{self.name}' Stability Analysis:")
+        refstable = Table(show_header=False, header_style="bold magenta", box=None, title="Reference Quantities")
+        refstable.add_column("Parameter", style="cyan", no_wrap=True)
+        refstable.add_column("Value", style="magenta", no_wrap=True)
+        refstable.add_row("q_inf", f"{q_inf:.3f} Pa")
+        refstable.add_row("Sref", f"{refArea:.3f} m^2")
+        refstable.add_row("bref", f"{refSpan:.3f} m")
+        refstable.add_row("cref", f"{refChord:.3f} m")
+        refstable.add_row("X_NP", f"{self.results['stability']['X_NP']:.3f} m")
 
+        # Pull out static and dynamic derivatives and evaluate them
+        # Cm alpha, Cmq, Cn beta, Cn r, C l p
         nd_derivs_modified = self.results["stability"]["derivs_body_axes"].copy().drop(columns=["Mach"])
         # Convert alpha, beta, p, q, r, derivatives to per radian from per degree
         # THEYRE DERIVATVES SO THEY LOOK LIKE THEYRE BEING CONVERTED BACKWARDS!!!!
-        nd_derivs_modified["alpha"] = np.rad2deg(nd_derivs_modified["alpha"])
-        nd_derivs_modified["beta"]  = np.rad2deg(nd_derivs_modified["beta"])
-        nd_derivs_modified["p"]     = np.rad2deg(nd_derivs_modified["p"])
-        nd_derivs_modified["q"]     = np.rad2deg(nd_derivs_modified["q"])
-        nd_derivs_modified["r"]     = np.rad2deg(nd_derivs_modified["r"])
 
+        nd_derivs_modified["W"] = nd_derivs_modified["alpha"] / self.getParameter("velocity")['value'] #create w-derivative
+        nd_derivs_modified["V"] = nd_derivs_modified["beta"] / self.getParameter("velocity")['value'] #create v-derivative
+
+        Cm_alpha = self.results['stability']['derivs_stability_axes'].loc['Cm', 'alpha']
+        Cm_q = self.results['stability']['derivs_stability_axes'].loc['Cm', 'q']
+        Cn_beta = self.results['stability']['derivs_stability_axes'].loc['Cn', 'beta']
+        Cl_beta = self.results['stability']['derivs_stability_axes'].loc['Cl', 'beta']
+        Cn_r = self.results['stability']['derivs_stability_axes'].loc['Cn', 'r']
+        Cl_p = self.results['stability']['derivs_stability_axes'].loc['Cl', 'p']
+        Cl_r = self.results['stability']['derivs_stability_axes'].loc['Cl', 'r']
+
+
+        def rating(quantity, lower, higher):
+            if quantity < lower:
+                perc = 0
+            elif quantity > higher:
+                perc = 100
+            else:
+                perc = 100*(1 - np.exp(-2*quantity / (higher-lower)))
+
+            color = f"rgb({int(min(255, 2 * 255 * (100 - perc)/100))},{int(min(255, 2 * 255 * (perc/100)))},0)"
+            #color = "green" if perc > 70 else "yellow" if perc > 25 else "red"
+            return f"[{color}]{'█' * max(int(perc/4), 1)}[/{color}]"
         
+        def ratingColor(quantity, lower, higher):
+            if quantity < lower:
+                perc = 0
+            elif quantity > higher:
+                perc = 100
+            else:
+                perc = 100*(1 - np.exp(-2*quantity / (higher-lower)))
 
-        nd_derivs_modified["W"] = nd_derivs_modified["alpha"] / self.getParameter("velocity") #create w-derivative
-        nd_derivs_modified["V"] = nd_derivs_modified["beta"] / self.getParameter("velocity") #create v-derivative
-        console.print(f"{self._prefix} Modified non-dimensional derivatives:")
-        console.print(nd_derivs_modified)
-        #already have u derivatives
+            return f"rgb({int(min(255, 2 * 255 * (100 - perc)/100))},{int(min(255, 2 * 255 * (perc/100)))},0)"
+
+
+        stabtable = Table(show_header=False, header_style="bold magenta", box=None, title="Stability Derivatives (1/rad)", title_justify="center")
+        stabtable.add_column("Derivative", style="cyan", no_wrap=True)
+        stabtable.add_column("Value", style="magenta", no_wrap=True)
+        stabtable.add_column("Expected Range", style="green", no_wrap=True)
+        stabtable.add_column("Rating", no_wrap=True)
+        stabtable.add_row("Static Margin", f"{self.results['stability']['SM']*100:.1f}%", "10% ~ 30%", rating(self.results['stability']['SM'], 0.1, 0.3),  style=ratingColor(self.results['stability']['SM'], 0.1, 0.3))
+        stabtable.add_row("Cm alpha", f"{Cm_alpha:.3f}", "-1.5 ~ -0.3", rating(-Cm_alpha, 0.3, 1), style=ratingColor(-Cm_alpha, 0.3, 1))
+        stabtable.add_row("Cm q", f"{Cm_q:.3f}", "-40 ~ -5", rating(-Cm_q, 5, 40), style=ratingColor(-Cm_q, 5, 40))
+        stabtable.add_row("Cn beta", f"{Cn_beta:.3f}", "0.05 ~ 0.4", rating(Cn_beta, 0.05, 0.4), style=ratingColor(Cn_beta, 0.05, 0.4))
+        stabtable.add_row("Cn r", f"{Cn_r:.3f}", "-1 ~ -0.1", rating(-Cn_r, 0.1, 1), style=ratingColor(-Cn_r, 0.1, 1))
+        stabtable.add_row("Cl beta", f"{Cl_beta:.3f}", "< 0", rating(-Cl_beta, 0, 0.2), style=ratingColor(-Cl_beta, 0, 0.2))
+        stabtable.add_row("Cl p", f"{Cl_p:.3f}", "< -0.2", rating(-Cl_p, 0.2, 0.4), style=ratingColor(-Cl_p, 0.2, 0.4))
+        stabtable.add_row("Cl r", f"{Cl_r:.3f}", "> 0.1", rating(-Cl_r, 0.1, 0.3), style=ratingColor(-Cl_r, 0.1, 0.3))
+
+        modes_table = self._calculateDynamicModes()
+
+
+        console.print(Padding(Columns([refstable, stabtable, modes_table], padding=(0, 0, 0, 4)), (0, 0, 0, 8)))
+
+        #console.print(f"{self._prefix} Modified non-dimensional derivatives:")
         #console.print(nd_derivs_modified)
-        #convert to dimensional derivatives
-        d_derivs_modified = pd.DataFrame(columns=nd_derivs_modified.columns, index=["X", "Y", "Z", "L", "M", "N"], dtype=float)
-        d_derivs_modified.loc["X"] = nd_derivs_modified.loc["CFx"] * q_inf * refArea
-        d_derivs_modified.loc["Y"] = nd_derivs_modified.loc["CFy"] * q_inf * refArea
-        d_derivs_modified.loc["Z"] = -nd_derivs_modified.loc["CFz"] * q_inf * refArea
-        d_derivs_modified.loc["L"] = nd_derivs_modified.loc["CMx"] * q_inf * refArea * refSpan
-        d_derivs_modified.loc["M"] = nd_derivs_modified.loc["CMy"] * q_inf * refArea * refChord
-        d_derivs_modified.loc["N"] = -nd_derivs_modified.loc["CMz"] * q_inf * refArea * refSpan
-        
-        d_derivs_modified["p"] = d_derivs_modified["p"] * refSpan / (2*self.getParameter("velocity"))
-        d_derivs_modified["q"] = d_derivs_modified["q"] * refChord / (2*self.getParameter("velocity"))
-        d_derivs_modified["r"] = d_derivs_modified["r"] * refSpan / (2*self.getParameter("velocity"))
 
-        console.print(f"{self._prefix} Dimensional derivatives:")
-        console.print(d_derivs_modified)
+        fpa = 0 if not self.getParameter('flight_path_angle') else self.getParameter('flight_path_angle')['value']
 
-        console.print(f"{self._prefix} FPA: {self.getParameter('flight_path_angle')}")
+        console.print(f"{self._prefix} FPA: {fpa}")
         console.print(f"{self._prefix} Alpha: {self.results['stability']['final_inputs'].loc[0, 'alpha']}")
-        theta0 = np.deg2rad(self.getParameter("flight_path_angle") + self.results['stability']['final_inputs'].loc[0, 'alpha'])
+        theta0 = np.deg2rad(fpa + self.results['stability']['final_inputs'].loc[0, 'alpha'])
         console.print(f"{self._prefix} Body-Angle theta: {np.degrees(theta0):.3f} degrees")
-        # Make state matrices
 
-        Iyy = config.getMassConfiguration(self.getParameter("massconfig_index")).inertia_matrix[1,1]
-        console.print(f"{self._prefix} Iyy: {Iyy:.3f} kg*m^2")
-        m = config.getMassConfiguration(self.getParameter("massconfig_index")).mass
-        console.print(f"{self._prefix} Mass: {m:.3f} kg")
+    def _calculateDynamicModes(self):
+        rho = self.getParameter("density")['value']
+        u0 = self.getParameter("velocity")['value']
+        q_inf = 0.5 * self.getParameter("density")['value'] * self.getParameter("velocity")['value'] ** 2
+        refArea = config.getReferenceQuantities()["refArea"]
+        refSpan = config.getReferenceQuantities()["refSpan"]
+        refChord = config.getReferenceQuantities()["refChord"]
+        Cw0 = config.getMassConfiguration(self.getParameter("massconfig_index")['value']).mass * constants.g / (q_inf * refArea)
+
+        CD0 = self.results['stability']['base_case_stability_axes'].loc[0, 'CD']
+        CL0 = self.results['stability']['base_case_stability_axes'].loc[0, 'CL']
+
+        fpa = 0 if not self.getParameter('flight_path_angle') else self.getParameter('flight_path_angle')['value']
+        theta0 = np.deg2rad(fpa + self.results['stability']['final_inputs'].loc[0, 'alpha']) #Body angle
+
+        CT0 = CD0 + Cw0*np.sin(theta0)
+        CTu = -3*CT0
+        #console.print(f"{self._prefix} CT0: {CT0}, CTu: {CTu}")
+        CDu = self.results['stability']['derivs_stability_axes'].loc['CD', 'U']
+        CL_u = self.results['stability']['derivs_stability_axes'].loc['CL', 'U']
+
+        CD_alpha = self.results['stability']['derivs_stability_axes'].loc['CD', 'alpha']
+        CL_alpha = self.results['stability']['derivs_stability_axes'].loc['CL', 'alpha']
+        CLq = self.results['stability']['derivs_stability_axes'].loc['CL', 'q']
+        Cmu = self.results['stability']['derivs_stability_axes'].loc['Cm', 'U']
+        Cmalpha = self.results['stability']['derivs_stability_axes'].loc['Cm', 'alpha']
+        Cmq = self.results['stability']['derivs_stability_axes'].loc['Cm', 'q']
+
+        # TODO: Do something about this
+        CL_alphadot = 0 
+        Cm_alphadot = 0
+
+        Xu = (1/2)*rho*u0*refArea*(2*(-CD0+CT0) + (-CDu + CTu))
+        Xw = (1/2)*rho*u0*refArea*(-CD_alpha + CL0)
+        Zu = (1/2)*rho*u0*refArea*(-2*CL0 - CL_u)
+        Zw = (1/2)*rho*u0*refArea*(-CD0 - CL_alpha)
+        Zq = (1/4)*rho*u0*refChord*refArea*(-CLq)
+        Zwdot = (1/4)*rho*refChord*refArea*(-CL_alphadot)
+        Mu = (1/2)*rho*u0*refChord*refArea*Cmu
+        Mw = (1/2)*rho*u0*refChord*refArea*Cmalpha
+        Mq = (1/4)*rho*u0*(refChord**2)*refArea*Cmq
+        Mwdot = (1/4)*rho*(refChord**2)*refArea*Cm_alphadot
+
         g = constants.g
-        ueq = self.getParameter("velocity")
-        console.print(f"{self._prefix} g: {g:.3f} m/s^2")
-        X_u = float(d_derivs_modified.loc["X", "U"])
-        X_w = float(d_derivs_modified.loc["X", "W"])
-        X_q = float(d_derivs_modified.loc["X", "q"])
-        Z_u = float(d_derivs_modified.loc["Z", "U"])
-        Z_w = float(d_derivs_modified.loc["Z", "W"])
-        Z_q = float(d_derivs_modified.loc["Z", "q"])
-        M_u = float(d_derivs_modified.loc["M", "U"])
-        M_w = float(d_derivs_modified.loc["M", "W"])
-        M_q = float(d_derivs_modified.loc["M", "q"])
+        m = config.getMassConfiguration(self.getParameter("massconfig_index")['value']).mass
+        Iy = config.getMassConfiguration(self.getParameter("massconfig_index")['value']).inertia_matrix[1,1]
 
-        #NOTE: W-Dot/etc derivatives not included (can they be approximated??)
+        AL = [
+                [Xu/m,         Xw/m,         0,                     -g*np.cos(theta0)],
+                [Zu/(m-Zwdot), Zw/(m-Zwdot), (Zq + m*u0)/(m-Zwdot), -(m*g*np.sin(theta0))/(m-Zwdot)],
+                [(Mu + (Mwdot*Zu)/(m-Zwdot))/Iy, (Mw + (Mwdot*Zw)/(m-Zwdot))/Iy, (Mq + (Mwdot*(Zq+m*u0))/(m-Zwdot))/Iy, ((Mwdot*(-m*g*np.sin(theta0)))/(m-Zwdot))/Iy],
+                [0, 0, 1, 0]
+             ]
+        
+        #Lateral stability
+        CYbeta = self.results['stability']['derivs_stability_axes'].loc['CY', 'beta']
+        CYp = self.results['stability']['derivs_stability_axes'].loc['CY', 'p']
+        CYr = self.results['stability']['derivs_stability_axes'].loc['CY', 'r']
+        Clbeta = self.results['stability']['derivs_stability_axes'].loc['Cl', 'beta']
+        Clp = self.results['stability']['derivs_stability_axes'].loc['Cl', 'p']
+        Clr = self.results['stability']['derivs_stability_axes'].loc['Cl', 'r']
+        Cnbeta = self.results['stability']['derivs_stability_axes'].loc['Cn', 'beta']
+        Cnp = self.results['stability']['derivs_stability_axes'].loc['Cn', 'p']
+        Cnr = self.results['stability']['derivs_stability_axes'].loc['Cn', 'r']
+        
+        Yv = (1/2)*rho*u0*refArea*CYbeta
+        Yp = (1/4)*rho*u0*refSpan*refArea*CYp
+        Yr = (1/4)*rho*u0*refSpan*refArea*CYr
+        Lv = (1/2)*rho*u0*refSpan*refArea*Clbeta
+        Lp = (1/4)*rho*u0*(refSpan**2)*refArea*Clp
+        Lr = (1/4)*rho*u0*(refSpan**2)*refArea*Clr
+        Nv = (1/2)*rho*u0*refSpan*refArea*Cnbeta
+        Np = (1/4)*rho*u0*(refSpan**2)*refArea*Cnp
+        Nr = (1/4)*rho*u0*(refSpan**2)*refArea*Cnr
 
-        A_long = np.array([[X_u/m, X_w/m, X_q/m, -g*np.cos(theta0)],
-                           [Z_u/m, Z_w/m, Z_q/m, -g*np.sin(theta0)],
-                           [M_u/Iyy, M_w/Iyy, M_q/Iyy, 0.0],
-                           [0.0, 0.0, 1.0, 0.0]])
+        Ix = config.getMassConfiguration(self.getParameter("massconfig_index")['value']).inertia_matrix[0,0]
+        Iz = config.getMassConfiguration(self.getParameter("massconfig_index")['value']).inertia_matrix[2,2]
+        Ixz = config.getMassConfiguration(self.getParameter("massconfig_index")['value']).inertia_matrix[0,2]
+        xi = Ix*Iz-Ixz**2
 
-        eigvals_long, eigvecs_long = np.linalg.eig(A_long)
-        console.print(f"{self._prefix} Longitudinal Eigenvalues and Eigenvectors:")
-        for i, eigval in enumerate(eigvals_long):
-            console.print(f"Eigenvalue {i+1}: {eigval:.3f}")
-            console.print(f"Eigenvector {i+1}: {eigvecs_long[:, i]}")
+        ALD = [
+                [Yv/m, Yp/m, (Yr/m - u0), g*np.cos(theta0)],
+                [(1/xi)*(Iz*Lv + Ixz*Nv), (1/xi)*(Iz*Lp + Ixz*Np), (1/xi)*(Iz*Lr + Ixz*Nr), 0],
+                [(1/xi)*(Ixz*Lv + Ix*Nv), (1/xi)*(Ixz*Lp + Ix*Np), (1/xi)*(Ixz*Lr + Ix*Nr), 0],
+                [0, 1, np.tan(theta0), 0]
+               ]
+
+        eigenvaluesL, eigenvectorsL = np.linalg.eig(AL)
+        eigenvaluesLD, eigenvectorsD = np.linalg.eig(ALD)
+
+        modes_table = Table(show_header=True, header_style="bold magenta", box=None, title="Dynamic Modes")
+        modes_table.add_column("Mode", style="cyan", no_wrap=True)
+        modes_table.add_column("λ", style="magenta", no_wrap=True)
+        modes_table.add_column("ωd (Hz)", style="magenta", no_wrap=True)
+        modes_table.add_column("ωn (Hz)", style="magenta", no_wrap=True)
+        modes_table.add_column("ζ", style="magenta", no_wrap=True)
+        modes_table.add_column("τ (s)", style="magenta", no_wrap=True)
+        modes_table.add_column("Type", style="magenta", no_wrap=True)
+        """
+            For longitudinal modes:1
+                - bigger magnitude complex pair: short period
+                - smaller magnitude complex pair: phugoid
+        """
+        sorted_eigs_L = sorted(eigenvaluesL, key=lambda x: abs(x), reverse=True)
+
+        # Process short period mode
+        short_period = sorted_eigs_L[:2]
+        sp_wd = np.abs(np.imag(short_period[0])) # rad/s
+        sp_wn = np.abs(short_period[0]) # rad/s
+        sp_zeta = -np.real(short_period[0])/np.abs(short_period[0])
+        sp_timehalf = np.log(2)/np.abs(np.real(short_period[0])) # s
+        if sp_wd >= 1 and 0.35 < sp_zeta < 1.3:
+            sp_level = "I"
+            sp_color = "green"
+        elif sp_wd >= 0.6 and 0.25 < sp_zeta < 2.0:
+            sp_level = "II"
+            sp_color = "yellow"
+        elif 0.15 < sp_zeta < 0.7:
+            sp_level = "III"
+            sp_color = "dark_orange3"
+        else:
+            sp_level = ":warning:"
+            sp_color = "red"
+        modes_table.add_row("Short Period", f"{short_period[0]:.2f}", f"{sp_wd/(2*np.pi):.2f}", f"{sp_wn/(2*np.pi):.2f}", f"{sp_zeta:.2f}", f"{sp_timehalf:.2f}", sp_level, style = sp_color)
+        
+        # Process phugiod mode
+        phugoid = sorted_eigs_L[2:]
+        ph_wd = np.abs(np.imag(phugoid[0])) # rad/s
+        ph_wn = np.abs(phugoid[0]) # rad/s
+        ph_zeta = -np.real(phugoid[0])/np.abs(phugoid[0])
+        ph_timehalf = np.log(2)/np.abs(np.real(phugoid[0])) # s
+        if ph_zeta > 0.04:
+            ph_level = "I"
+            ph_color = "green"
+        elif ph_zeta > 0:
+            ph_level = "II"
+            ph_color = "yellow"
+        elif ph_timehalf >= 55:
+            ph_level = "III"
+            ph_color = "dark_orange3"
+        else:
+            ph_level = ":warning:"
+            ph_color = "red"
+        modes_table.add_row("Phugoid", f"{phugoid[0]:.2f}", f"{ph_wd/(2*np.pi):.2f}", f"{ph_wn/(2*np.pi):.2f}", f"{ph_zeta:.2f}", f"{ph_timehalf:.2f}", ph_level, style = ph_color)
+
+        #Process spiral mode
+        sorted_eigns_LD = sorted(eigenvaluesLD, key = lambda x: abs(x))
+        spiral = sorted_eigns_LD.pop(0) # Usually the smallest eigenvalue, and real
+        sr_timehalf = np.log(2)/np.abs(np.real(spiral)) # s
+        if sr_timehalf > 12:
+            spiral_level = "I"
+            spiral_color = "green"
+        elif sr_timehalf > 8:
+            spiral_level = "II"
+            spiral_color = "yellow"
+        elif sr_timehalf > 4:
+            spiral_level = "III"
+            spiral_color = "dark_orange3"
+        else:
+            spiral_level = ":warning:"
+            spiral_color = "red"
+        modes_table.add_row("Spiral", f"{spiral:.2f}", "--", "--", "--", f"{sr_timehalf:.2f}", spiral_level, style = spiral_color)
+
+        # Find the pure real eigenvalue that's left -> roll mode
+        for i, eig in enumerate(sorted_eigns_LD):
+            if np.isreal(eig):
+                roll = sorted_eigns_LD.pop(i)
+                break
+        
+        roll_timehalf = np.log(2)/np.abs(np.real(roll)) # s
+        roll_timeconst = 1/np.abs(np.real(roll))
+        if roll_timeconst < 1.0 and np.real(roll) < 0:
+            roll_level = "I"
+            roll_color = "green"
+        elif roll_timeconst < 1.4 and np.real(roll) < 0:
+            roll_level = "II"
+            roll_color = "yellow"
+        elif roll_timeconst < 10 and np.real(roll) < 0:
+            roll_level = "III"
+            roll_color = "dark_orange3"
+        else:
+            roll_level = ":warning:"
+            roll_color = "red"
+        modes_table.add_row("Roll", f"{roll:.2f}", "--", "--", "--", f"{roll_timehalf:.2f}", roll_level, style = roll_color)
+
+        # Process dutch roll
+        dutch_roll = sorted_eigns_LD[0]
+        dr_wd = np.abs(np.imag(dutch_roll))
+        dr_wn = np.abs(dutch_roll)
+        dr_zeta = -np.real(dutch_roll)/np.abs(dutch_roll)
+        dr_timehalf = np.log(2)/np.abs(np.real(dutch_roll))
+        if (dr_wn*dr_zeta) > 0.4 and dr_zeta > 0.04 and dr_wn > 1:
+            dr_level = "I"
+            dr_color = "green"
+        elif (dr_wn*dr_zeta) > 0.05 and dr_zeta > 0.02 and dr_wn > 0.4:
+            dr_level = "II"
+            dr_color = "yellow"
+        elif dr_zeta > 0 and dr_wn > 0.4:
+            dr_level = "III"
+            dr_color = "dark_orange3"
+        else:
+            dr_level = ":warning:"
+            dr_color = "red"
+        modes_table.add_row("Dutch Roll", f"{dutch_roll:.2f}", f"{dr_wd/(2*np.pi):.2f}", f"{dr_wn/(2*np.pi):.2f}", f"{dr_zeta:.2f}", f"{dr_timehalf:.2f}", dr_level, style=dr_color)
 
 
-        omega_short_period_approx = np.sqrt((1/(m*Iyy)*Z_w*M_q - (ueq/Iyy)*M_w))
-        zeta_short_period_approx = - (1/(2*m*omega_short_period_approx)) * (Z_w/m + (1/Iyy)*(M_q))
+        # Create the plot
+        fig, ax = plt.subplots()
 
-        omega_phugoid_approx = np.sqrt(- (Z_u*g)/(m*ueq))
-        zeta_phugoid_approx = - X_u / (2 * omega_phugoid_approx * m)
+        # Plot eigenvalues in the complex plane
+        ax.scatter(eigenvaluesL.real, eigenvaluesL.imag, color='b', label='Eigenvalues Longitudinal')
+        ax.scatter(eigenvaluesLD.real, eigenvaluesLD.imag, color='r', label='Eigenvalues Lateral')
 
-        console.print(f"{self._prefix} Short Period Approximation:")
-        console.print(f"{self._prefix} Omega: {omega_short_period_approx:.3f}")
-        console.print(f"{self._prefix} Zeta: {zeta_short_period_approx:.3f}")
-        console.print(f"{self._prefix} Phugoid Approximation:")
-        console.print(f"{self._prefix} Omega: {omega_phugoid_approx:.3f}")
-        console.print(f"{self._prefix} Zeta: {zeta_phugoid_approx:.3f}")
+        # Plot axes
+        ax.axhline(0, color='black', linestyle='--', linewidth=0.5)
+        ax.axvline(0, color='black', linestyle='--', linewidth=0.5)
 
-    def displayStabilityResults(self):
-        pass      
+        # Labels and title
+        ax.set_xlabel('Real Axis')
+        ax.set_ylabel('Imaginary Axis')
+        ax.set_title('Eigenvalue Plot')
+        ax.legend()
+        ax.grid(True)
+
+        # Show the plot
+        plt.show(block=False)
+        plt.savefig('eigs.png')
+
+        return modes_table
 
     @classmethod
     def from_dict(cls, data):

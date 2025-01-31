@@ -1,8 +1,0 @@
-setup.py
-degen_geom/__init__.py
-degen_geom/degen_geom.py
-degen_geom.egg-info/PKG-INFO
-degen_geom.egg-info/SOURCES.txt
-degen_geom.egg-info/dependency_links.txt
-degen_geom.egg-info/requires.txt
-degen_geom.egg-info/top_level.txt
