@@ -8,6 +8,7 @@ import vsp_utils as utils
 import aero
 import geom
 import config_manager
+import prop
 from rich.console import Console
 from rich.table import Table
 
@@ -37,6 +38,7 @@ config_manager.console = console
 utils.console = console
 aero.console = console
 geom.console = console
+aero.console = console
 
 current_menu = "main"
 
@@ -94,6 +96,16 @@ def enterAeroMenu(_):
     current_menu = "aero"
     return True
 
+def enterPropMenu(_):
+    global current_menu
+    prefix = menustructure[current_menu]["prefix"]
+    if not config.isModelLoaded():
+        console.print(f"\t{prefix} [red]No configuration set.[/red]")
+        return True
+    console.print(f"\t{prefix} Entering prop menu.")
+    current_menu = "prop"
+    return True
+
 def raiseMenu():
     global current_menu
     if current_menu == "main":
@@ -142,6 +154,10 @@ menustructure = {
             "aero": {
                 "desc": "Enter aerodynamics menu",
                 "action": enterAeroMenu
+            },
+            "prop": {
+                "desc": "Enter propulsion menu",
+                "action": enterPropMenu
             },
             "gui" : {
                 "desc": "Open the VSP GUI",
@@ -209,6 +225,29 @@ menustructure = {
                 "usage":"delete <index>"
             }
         }
+    },
+    "prop":{
+        "prefix":"[bold yellow]prop[/bold yellow]",
+        "parent":"main",
+        "commands": {
+            "help":{
+                "desc":"List available commands",
+                "action":help
+            },
+            "list":{
+                "desc":"List propulsion configurations",
+                "action":prop.listPropulsionConfigurations
+            },
+            "new":{
+                "desc":"Create new propulsion configuration from known numbers",
+                "action":prop.createPropulsionConfiguration
+            },
+            "delete":{
+                "desc":"Remove propulsion configuration by index",
+                "action":prop.deletePropulsionConfiguration,
+                "usage":"delete <index>"
+            }
+        }
     }
 }
 
@@ -246,6 +285,8 @@ def main():
                     console.print("[red]Usage:", menu["commands"][command].get("usage", command)) #bro I hate python
             else: #non recognized command
                 console.print("[red]Unknown command. Type 'help' to see commands.[/red]")
+        except NotImplementedError:
+            console.print("[red]Command not implemented yet.[/red]")
         except KeyboardInterrupt:
             console.print()
             cleanExit(None)
