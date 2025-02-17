@@ -10,6 +10,7 @@ config = ConfigurationManager()
 console = None
 
 def listPropulsionConfigurations(args):
+    
     """List propulsion configurations as defined."""
     raise NotImplementedError
 
