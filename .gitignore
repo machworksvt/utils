@@ -1,5 +1,5 @@
 geometry/*
-!geometry/icarus_mk.vsp3
+!geometry/icarus_mk[0-9].vsp3
 /tools/__pycache__
 /tools/*.adb
 /tools/*.dat
