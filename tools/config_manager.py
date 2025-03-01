@@ -22,10 +22,9 @@ console = None
 
 """
 TODO:
-    Fix CD results giving NaN
     Finish implementing the hi-lift operating point
-    Actually fix the dynamic system matrix generation
     Implement the powerplant class
+    sav
     Improve the mass configuration class
 """
 
@@ -213,12 +212,42 @@ class PowerPlant:
 
     #TODO: Implement
 
+    _types = ["Constant Thrust", "Constant Power"]
+
     _prefix = "[bold dark_orange3]\t<powerplant>[/bold dark_orange3]"
 
     def __init__(self, name="Powerplant"):
         self.name = name
+        self.type = None
+        self.tIdle = 0
         self.tsfc = 0
         self.tmax = 0
+
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "tsfc": self.tsfc,
+            "tmax": self.tmax
+    }
+
+    def print(self):
+        console.print(f"{self._prefix} Powerplant '{self.name}'")
+        printtable = Table(title="Powerplant", show_header=False, box=None)
+        printtable.add_column("Parameter", style="cyan")
+        printtable.add_column("Value", style="magenta")
+        printtable.add_row("Type", self.type)
+        printtable.add_row("Idle Thrust (N)", self.tIdle)
+        printtable.add_row("Max Thrust (N)", self.tmax)
+        printtable.add_row("TSFC (kg/N/s)", self.tsfc)
+        console.print(Padding(printtable, (0, 0, 0, 8)))
+    
+    @classmethod
+    def from_dict(cls, data):
+        return PowerPlant(
+            name=data["name"],
+            tsfc=data["tsfc"],
+            tmax=data["tmax"]
+        )
 
 class MassConfiguration:
     """Represents the mass configuration of the vehicle"""
@@ -857,7 +886,7 @@ class OperatingPoint:
             self.isConverged = True
             return True
 
-        reduced_jacobian_inverse = np.linalg.pinv(reduced_jacobian)
+        reduced_jacobian_inverse = np.linalg.pinv(reduced_jacobian, rcond=1e-5)
 
         input_adjust_vector = reduced_jacobian_inverse @ error_vector
         
@@ -913,9 +942,9 @@ class OperatingPoint:
         vsp.SetDoubleAnalysisInput(analysisString, "Ycg", [mconfig.cg[1]])
         vsp.SetDoubleAnalysisInput(analysisString, "Zcg", [mconfig.cg[2]])
 
-        if self.settings["type"] == "hilift":
-            vsp.SetIntAnalysisInput(analysisString, "GroundEffectToggle", [True])
-            vsp.SetDoubleAnalysisInput(analysisString, "GroundEffect", [self.getParameter("ground_effect_distance")['value']])
+        #if self.settings["type"] == "hilift":
+        #    vsp.SetIntAnalysisInput(analysisString, "GroundEffectToggle", [True])
+        #    vsp.SetDoubleAnalysisInput(analysisString, "GroundEffect", [self.getParameter("ground_effect_distance")['value']])
 
 
         vsp.SetStringAnalysisInput(analysisString, "RedirectFile", ["log.txt"])
@@ -1312,10 +1341,6 @@ class OperatingPoint:
                 load_factor = np.cos(fpa)
                 self._setParameter("load_factor", load_factor)
                 self._setCalculated("load_factor", True)
-
-
-
-
         
         #TODO: Improve this system here
         if all(not (self.getParameter(param)['value'] is None) for param in ["velocity","density","dynamic_viscosity"]): #Auto-calculate Reynold's number
@@ -1893,5 +1918,5 @@ class OperatingPoint:
                 "details": controls_data[group_name]
             }
 
-        if self.settings['type'] == "cruise":
+        if self.settings['type'] == "cruise" or self.settings['type'] == "hilift":
             self.updateParameter("load_factor", 1)

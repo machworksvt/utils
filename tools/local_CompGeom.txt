@@ -1,0 +1,34 @@
+...Comp Geom...
+5 Num Comps
+8 Total Num Meshes
+45042 Total Num Tris
+
+Theo_Area   Wet_Area   Theo_Vol    Wet_Vol  Name
+    0.639      0.598      0.009      0.008  MainWing       
+    0.639      0.598      0.009      0.008  MainWing       
+    0.721      0.678      0.025      0.025  Fusealge       
+    0.108      0.098      0.001      0.001  VTail          
+    0.108      0.098      0.001      0.001  VTail          
+    0.067      0.058      0.000      0.000  Elevator       
+    0.067      0.058      0.000      0.000  Elevator       
+    0.015      0.000      0.000      0.000  ER-40          
+-------------------------------------------------
+    2.365      2.186      0.045      0.043  Totals         
+
+Tag_Theo_Area   Tag_Wet_Area    Tag_Name
+        0.531          0.490    MainWing_S_Surf0
+        0.531          0.490    MainWing_S_Surf1
+        0.721          0.678    Fusealge_S_Surf0
+        0.088          0.078    VTail_S_Surf0  
+        0.088          0.078    VTail_S_Surf1  
+        0.016          0.007    Elevator_S_Surf0
+        0.016          0.007    Elevator_S_Surf1
+        0.015          0.000    ER-40_S_Surf0  
+        0.076          0.076    MainWing_S_Surf0,Flaps
+        0.032          0.032    MainWing_S_Surf0,Ailerons
+        0.076          0.076    MainWing_S_Surf1,Flaps
+        0.032          0.032    MainWing_S_Surf1,Ailerons
+        0.020          0.020    VTail_S_Surf0,Ruddervators
+        0.020          0.020    VTail_S_Surf1,Ruddervators
+        0.051          0.051    Elevator_S_Surf0,SS_CONT_0
+        0.051          0.051    Elevator_S_Surf1,SS_CONT_0
