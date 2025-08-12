@@ -1,0 +1,259 @@
+import sympy as sp
+import numpy as np
+from scipy.optimize import minimize
+
+import sympy as sp
+import numpy as np
+from sympy.utilities.lambdify import lambdify
+from scipy.optimize import minimize
+
+
+class EquationSet:
+    def __init__(self, *equation_strings):
+        self.equation_strings = equation_strings
+
+        # Parse symbolic residuals: LHS - RHS = 0
+        self.equations = [sp.sympify(eq.replace("=", "-(") + ")", evaluate=False) for eq in equation_strings]
+
+        # Extract all symbols
+        self.symbols = sorted(set().union(*[eq.free_symbols for eq in self.equations]), key=lambda s: s.name)
+
+        # Create fast numerical residual and jacobian functions using lambdify
+        self._compile_lambdas()
+
+    def _compile_lambdas(self):
+        """Create fast NumPy-compatible residual and Jacobian functions."""
+        # Residuals: symbolic expressions
+        self.residual_exprs = self.equations
+        self.residual_func = lambdify(self.symbols, self.residual_exprs, modules='numpy')
+
+        # Jacobian: matrix of partial derivatives
+        J = sp.Matrix(self.residual_exprs).jacobian(self.symbols)
+        self.jacobian_func = lambdify(self.symbols, J, modules='numpy')
+
+    def get_equations(self):
+        return self.equations
+
+    def get_symbols(self):
+        return [s.name for s in self.symbols]
+
+    def evaluate(self, values: dict):
+        """Evaluate residuals at given variable values using lambdified residuals."""
+        x = [values.get(s.name, 0.0) for s in self.symbols]
+        return self.residual_func(*x)
+
+    def jacobian(self, values: dict = None):
+        """Evaluate Jacobian numerically if values provided, else return symbolic."""
+        if values is None:
+            return sp.Matrix(self.residual_exprs).jacobian(self.symbols)
+        x = [values.get(s.name, 0.0) for s in self.symbols]
+        return self.jacobian_func(*x)
+
+    def solve(self, known_values: dict):
+        # Separate knowns and unknowns
+        known = {k: v for k, v in known_values.items() if v is not None}
+        unknown_syms = [s for s in self.symbols if s.name not in known]
+
+        if not unknown_syms:
+            raise ValueError("No unknowns to solve for.")
+
+        # Initial guess for unknowns
+        x0 = np.ones(len(unknown_syms))
+
+        # Full variable order
+        symbol_names = [s.name for s in self.symbols]
+
+        def pack(known, trial_unknowns):
+            full = {}
+            u = 0
+            for name in symbol_names:
+                if name in known:
+                    full[name] = known[name]
+                else:
+                    full[name] = trial_unknowns[u]
+                    u += 1
+            return full
+
+        def objective(x):
+            vals = pack(known, x)
+            res = self.residual_func(*[vals[s] for s in symbol_names])
+            return np.sum(np.square(res))
+
+        def jacobian_func(x):
+            vals = pack(known, x)
+            J_full = self.jacobian_func(*[vals[s] for s in symbol_names])
+            J_reduced = np.array(J_full)[:, [i for i, s in enumerate(symbol_names) if s not in known]]
+            return 2 * np.dot(J_reduced.T, self.residual_func(*[vals[s] for s in symbol_names]))
+
+        result = minimize(objective, x0, jac=jacobian_func, method='BFGS')
+
+        if not result.success:
+            raise RuntimeError(f"Optimization failed: {result.message}")
+
+        # Reassemble solution
+        solution = pack(known, result.x)
+        return solution
+
+eqs = EquationSet(
+    "span*sin(sweep) + tip_chord - root_chord - span*sin(back_sweep) = 0",
+    "avg_chord - tip_chord/2 - root_chord/2 = 0",
+    "aspect_ratio = span/avg_chord",
+    "area = span * avg_chord",
+    "taper = tip_chord/root_chord"
+)
+
+print("Equations:")
+for eq in eqs.get_equations():
+    print(eq)
+
+print("\nVariables:")
+print(eqs.get_symbols())
+
+print("\nJacobian:")
+print(eqs.jacobian())
+
+
+# input = {
+#     "aspect_ratio": None,
+#     "area": None,
+#     "sweep": None,
+#     "back_sweep": None,
+#     "tip_chord": None,
+#     "root_chord": None,
+#     "span": None,
+#     "avg_chord": None,
+#     "taper": None
+# }
+input = {
+    "aspect_ratio": None,
+    "area": None,
+    "sweep": 10,
+    "back_sweep": None,
+    "tip_chord": None,
+    "root_chord": None,
+    "span": 5,
+    "avg_chord": None,
+    "taper": None
+}
+
+
+solution = eqs.solve(input)
+print("\nSolution:\n" + "\n".join(f"{k} = {v:.6g}" for k, v in solution.items()))
+
+
+import sympy as sp
+import numpy as np
+
+from sympy import solve, symbols
+
+class EquationSet:
+    def __init__(self, equations, known_vars):
+        # equations: iterable of equation strings, e.g. "a + b = c"
+        # known_vars: list or set of var names user will input to evaluate
+        self.known_vars = list(known_vars)
+        self.equations = []
+        self.all_vars = set()
+        for eq_str in equations:
+            lhs_str, rhs_str = map(str.strip, eq_str.split('='))
+            lhs = sp.sympify(lhs_str)
+            rhs = sp.sympify(rhs_str)
+            eq = sp.Eq(lhs, rhs)
+            self.equations.append(eq)
+            self.all_vars.update(lhs.free_symbols)
+            self.all_vars.update(rhs.free_symbols)
+        
+        # Convert to symbol list sorted by name
+        self.all_vars = sorted(self.all_vars, key=lambda s: s.name)
+        self.known_syms = [sp.Symbol(k) for k in self.known_vars]
+        
+        # Unknown vars = all vars - known vars
+        self.unknown_syms = [v for v in self.all_vars if v.name not in self.known_vars]
+        
+        # For each unknown var, try to solve an equation explicitly for it
+        self.solutions = {}
+        for unk in self.unknown_syms:
+            solved_expr = None
+            for eq in self.equations:
+                if unk in eq.free_symbols:
+                    sols = sp.solve(eq, unk, dict=True)
+                    if sols:
+                        # Take first solution (you could improve by handling multiple)
+                        solved_expr = sols[0][unk]
+                        break
+            if solved_expr is None:
+                raise ValueError(f"Cannot solve symbol '{unk}' explicitly from given equations.")
+            self.solutions[unk.name] = solved_expr
+        
+        # Prepare lambdified functions for fast evaluation of unknowns
+        # All expressions depend only on known vars
+        self.lambdas = {}
+        for unk_name, expr in self.solutions.items():
+            # lambdify with known_vars as input arguments
+            args_syms = self.known_syms
+            self.lambdas[unk_name] = sp.lambdify(args_syms, expr, modules='numpy')
+
+        self.symbolic_expressions = {}
+        
+        # Convert string equations to sympy
+        self.sym_eqs = [sp.Eq(*map(sp.sympify, eq.split('='))) for eq in equations]
+
+        # Collect all variables
+        all_vars = set()
+        for eq in self.sym_eqs:
+            all_vars.update(eq.free_symbols)
+        all_vars = sorted(all_vars, key=lambda s: s.name)
+
+        # Define unknown vars
+        self.known_vars = known_vars
+        self.unknown_vars = [str(v) for v in all_vars if str(v) not in known_vars]
+
+        # Solve symbolically for each unknown in terms of knowns
+        for unk in self.unknown_vars:
+            sym_unk = symbols(unk)
+            sol = solve(self.sym_eqs, sym_unk, dict=True)
+            if sol:
+                # Take first solution, substitute knowns as symbols
+                expr = sol[0][sym_unk]
+                self.symbolic_expressions[unk] = expr
+            else:
+                self.symbolic_expressions[unk] = f"Cannot solve for {unk}"
+
+    def print_equations(self):
+        print("Rearranged equations (unknown = expression):")
+        for var, expr in self.symbolic_expressions.items():
+            print(f"  {var} = {expr}")
+    def evaluate(self, *known_values):
+        if len(known_values) != len(self.known_vars):
+            raise ValueError(f"Expected {len(self.known_vars)} values, got {len(known_values)}")
+        known_dict = dict(zip(self.known_vars, known_values))
+        
+        result = known_dict.copy()
+        args = [known_dict[k] for k in self.known_vars]
+        for unk_name, func in self.lambdas.items():
+            val = func(*args)
+            # If val is sympy Expr, call evalf()
+            if hasattr(val, 'evalf'):
+                val = val.evalf()
+            try:
+                result[unk_name] = float(val)
+            except TypeError:
+                # Possibly val is still symbolic; fallback: convert to string or raise
+                raise TypeError(f"Cannot convert symbolic value to float: {val}")
+        return result
+
+
+
+equations = {
+    "span*sin_sweep + tip_chord - root_chord - span*sin_back_sweep = 0",
+    "avg_chord - tip_chord/2 - root_chord/2 = 0",
+    "aspect_ratio = span/avg_chord",
+    "area = span * avg_chord",
+    "taper = tip_chord/root_chord"
+}
+knowns = {"root_chord", "span", "tip_chord", "sin_sweep"}
+
+eqs = EquationSet(equations, knowns)
+
+eqs.print_equations()
+# result = eqs.evaluate(5, 10, 1, 10 * np.pi/180)
+# print(result)
